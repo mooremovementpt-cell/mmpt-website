@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moore Movement Personal Training | 1:1 PT in Mount Pleasant, Ballarat</title>
+<meta name="description" content="1:1 personal training, group fitness and custom programs with Noah at Moore Movement Personal Training, Mount Pleasant VIC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky: #BDE9FB;
+    --sky-soft: #E3F6FD;
+    --cream: #FFFFFF;
+    --cream-2: #F6F6F6;
+    --navy: #281A39;
+    --navy-soft: #5C5270;
+    --accent: #2FA3E0;
+    --accent-dark: #1C7FB8;
+    --star: #FFA733;
+    --radius: 0px;
+    --shadow: 0 18px 40px rgba(40,26,57,0.10);
+    --shadow-sm: 0 8px 20px rgba(40,26,57,0.08);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Quicksand', sans-serif;
+    color:var(--navy);
+    background:var(--sky);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.logo-text{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    line-height:1.15;
+    margin:0;
+  }
+  p{ line-height:1.7; color:var(--navy-soft); margin:0; }
+  a{ color:inherit; text-decoration:none; }
+  img{ max-width:100%; display:block; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
+  section{ position:relative; }
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid rgba(40,26,57,0.06);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    max-width:1180px; margin:0 auto; padding:14px 32px;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand img{ height:52px; width:auto; }
+  .nav-links{ display:flex; align-items:center; gap:32px; list-style:none; margin:0; padding:0; }
+  .nav-links a{
+    font-weight:600; font-size:15px; color:var(--navy);
+    padding:6px 2px; border-bottom:2px solid transparent;
+    transition:border-color .2s, color .2s;
+  }
+  .nav-links a:hover{ border-color:var(--accent); color:var(--accent-dark); }
+  .nav-right{ display:flex; align-items:center; gap:18px; }
+  .icon-link{
+    width:38px; height:38px; border-radius:0; display:flex; align-items:center;
+    justify-content:center; color:var(--navy); border:1.5px solid rgba(40,26,57,0.15);
+    transition:border-color .2s, color .2s;
+  }
+  .icon-link:hover{ border-color:var(--accent); color:var(--accent-dark); }
+  .nav-cta{
+    background:var(--navy); color:#fff !important; padding:11px 24px;
+    border-radius:0; font-weight:700; font-size:14px;
+    box-shadow:var(--shadow-sm);
+    transition:transform .2s, background .2s;
+  }
+  .nav-cta:hover{ background:var(--accent-dark); transform:translateY(-1px); }
+  .nav-toggle{
+    display:none; flex-direction:column; gap:5px; background:none; border:none;
+    cursor:pointer; padding:6px;
+  }
+  .nav-toggle span{ width:24px; height:2.5px; background:var(--navy); border-radius:0; }
+  .mobile-menu{ display:none; }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:linear-gradient(180deg, var(--sky) 0%, var(--sky-soft) 100%);
+    padding:90px 0 96px;
+    text-align:center;
+  }
+  .hero .wrap{ max-width:760px; }
+  .hero h1{ font-size:50px; color:var(--navy); margin-bottom:22px; }
+  .hero h1 span{ color:var(--accent-dark); }
+  .hero p.lead{ font-size:19px; max-width:560px; margin:0 auto 36px; }
+  .hero-ctas{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:16px 32px; border-radius:0; font-weight:700; font-size:15.5px;
+    cursor:pointer; border:none; transition:transform .2s, box-shadow .2s, background .2s;
+  }
+  .btn-primary{ background:var(--navy); color:#fff; box-shadow:var(--shadow-sm); }
+  .btn-primary:hover{ background:var(--accent-dark); transform:translateY(-2px); box-shadow:var(--shadow); }
+  .btn-secondary{ background:#fff; color:var(--navy); border:2px solid rgba(40,26,57,0.12); }
+  .btn-secondary:hover{ border-color:var(--accent); color:var(--accent-dark); transform:translateY(-2px); }
+
+  /* ---------- Section shared ---------- */
+  .section{ padding:96px 0; }
+  .section-head{ max-width:640px; margin:0 auto 52px; }
+  .section-head.center{ text-align:center; }
+  .eyebrow-text{
+    display:block; font-weight:700; font-size:13.5px; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--accent-dark); margin-bottom:14px;
+  }
+  .section-head h2{ font-size:36px; color:var(--navy); margin-bottom:14px; }
+  .section-head p{ font-size:16.5px; }
+
+  /* ---------- About ---------- */
+  .about{ background:var(--cream); }
+  .about-grid{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:64px; align-items:center; }
+  .about-photos{ position:relative; display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .about-photos img{ border-radius:0; box-shadow:var(--shadow-sm); object-fit:cover; width:100%; height:100%; }
+  .about-photos .tall{ grid-row:span 2; aspect-ratio:1/1.5; }
+  .about-photos .short{ aspect-ratio:1/1; }
+  .about-copy h2{ font-size:34px; margin-bottom:20px; color:var(--navy); }
+  .about-copy p{ margin-bottom:18px; font-size:16.5px; }
+
+  /* ---------- Services ---------- */
+  .services{ background:var(--sky-soft); }
+  .services-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .service-card{
+    background:var(--cream); border-radius:var(--radius); padding:38px 32px;
+    box-shadow:var(--shadow-sm); transition:transform .25s, box-shadow .25s;
+    display:flex; flex-direction:column; height:100%;
+  }
+  .service-card:hover{ transform:translateY(-6px); box-shadow:var(--shadow); }
+  .service-icon{ color:var(--accent-dark); margin-bottom:20px; }
+  .service-card h3{ font-size:21px; color:var(--navy); margin-bottom:12px; }
+  .service-card p{ font-size:15px; flex-grow:1; margin-bottom:22px; }
+  .service-link{ font-weight:700; font-size:14.5px; color:var(--navy); display:inline-flex; align-items:center; gap:6px; }
+  .service-link:hover{ color:var(--accent-dark); }
+
+  /* ---------- Reviews (prominent) ---------- */
+  .reviews{ background:var(--cream); padding:110px 0 120px; }
+  .reviews .section-head h2{ font-size:44px; }
+  .review-summary-line{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    flex-wrap:wrap; margin-top:6px;
+  }
+  .review-summary-line .stars{ color:var(--star); font-size:19px; letter-spacing:2px; }
+  .review-summary-line .score{ font-weight:700; font-size:18px; color:var(--navy); }
+  .review-summary-line a{ font-weight:700; color:var(--accent-dark); border-bottom:2px solid var(--accent); }
+  .review-summary-line a:hover{ color:var(--navy); }
+
+  /* Transformation spotlight */
+  .transformation{
+    display:grid; grid-template-columns:0.9fr 1.1fr; gap:48px; align-items:center;
+    background:var(--sky-soft); border-radius:0; padding:44px; margin:0 0 64px;
+  }
+  .carousel{ position:relative; border-radius:0; overflow:hidden; box-shadow:var(--shadow); aspect-ratio:4/5; }
+  .carousel-track{ position:relative; width:100%; height:100%; }
+  .carousel-track img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    opacity:0; transition:opacity .35s ease; border-radius:0; box-shadow:none;
+  }
+  .carousel-track img.active{ opacity:1; }
+  .carousel-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); width:38px; height:38px;
+    border-radius:0; background:rgba(255,255,255,0.85); border:none; cursor:pointer;
+    font-size:22px; line-height:1; color:var(--navy); display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow-sm); transition:background .2s;
+  }
+  .carousel-arrow:hover{ background:#fff; }
+  .carousel-arrow.prev{ left:14px; }
+  .carousel-arrow.next{ right:14px; }
+  .carousel-dots{
+    position:absolute; bottom:16px; left:0; right:0; display:flex; justify-content:center; gap:8px;
+  }
+  .carousel-dots .dot{
+    width:9px; height:9px; border-radius:0; background:rgba(255,255,255,0.55);
+    border:none; cursor:pointer; padding:0; transition:background .2s, transform .2s;
+  }
+  .carousel-dots .dot.active{ background:#fff; transform:scale(1.25); }
+  .transformation img{ border-radius:0; width:100%; box-shadow:var(--shadow); }
+  .transformation .stat-line{ display:flex; align-items:baseline; gap:14px; margin-bottom:18px; }
+  .transformation .stat-line .from{ font-family:'Baloo 2',sans-serif; font-size:26px; color:var(--navy-soft); text-decoration:line-through; }
+  .transformation .stat-line .arrow{ color:var(--accent-dark); font-size:22px; }
+  .transformation .stat-line .to{ font-family:'Baloo 2',sans-serif; font-size:34px; color:var(--accent-dark); font-weight:700; }
+  .transformation h3{ font-size:26px; color:var(--navy); margin-bottom:14px; }
+  .transformation p{ font-size:16px; margin-bottom:10px; }
+  .transformation .stars{ color:var(--star); font-size:16px; letter-spacing:2px; margin-bottom:10px; display:block; }
+  .transformation .who{ font-weight:700; color:var(--navy); font-family:'Baloo 2',sans-serif; margin-top:14px; }
+
+  .reviews-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:24px;
+  }
+  .review-card{
+    background:var(--sky-soft); border-radius:0; padding:32px 28px;
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .review-card .stars{ color:var(--star); font-size:16px; letter-spacing:2px; }
+  .review-card p{ font-size:15px; color:var(--navy); flex-grow:1; }
+  .review-author{ display:flex; align-items:center; gap:12px; margin-top:auto; }
+  .avatar{
+    width:40px; height:40px; border-radius:0; background:var(--accent);
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; flex-shrink:0;
+  }
+  .review-author .name{ font-weight:700; font-size:14.5px; color:var(--navy); }
+  .review-author .src{ font-size:12px; color:var(--navy-soft); }
+
+  .reviews-more{ text-align:center; margin-top:48px; }
+
+  /* ---------- Contact / Lead form ---------- */
+  .contact{ background:var(--sky-soft); }
+  .contact-grid{ display:grid; grid-template-columns:1fr 1.2fr; gap:56px; }
+  .contact-photo{
+    width:100%; max-width:320px; border-radius:0; box-shadow:var(--shadow-sm);
+    margin-bottom:28px; aspect-ratio:4/5; object-fit:cover; object-position:top;
+  }
+  .contact-info h2{ font-size:34px; margin-bottom:18px; }
+  .contact-info p{ font-size:16px; margin-bottom:26px; }
+  .contact-detail{ display:flex; align-items:flex-start; gap:14px; margin-bottom:22px; }
+  .contact-detail svg{ flex-shrink:0; margin-top:2px; color:var(--accent-dark); }
+  .contact-detail .label{ font-weight:700; color:var(--navy); font-size:15px; }
+  .contact-detail .value{ font-size:14.5px; color:var(--navy-soft); }
+  .contact-form{
+    background:var(--cream); border-radius:var(--radius); padding:40px;
+    box-shadow:var(--shadow-sm);
+  }
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .field{ margin-bottom:20px; }
+  .field label{ display:block; font-weight:700; font-size:13.5px; color:var(--navy); margin-bottom:8px; }
+  .field input, .field textarea{
+    width:100%; border:1.5px solid rgba(40,26,57,0.15); border-radius:0;
+    padding:13px 16px; font-family:'Quicksand',sans-serif; font-size:15px; color:var(--navy);
+    background:var(--cream-2); transition:border-color .2s;
+  }
+  .field input:focus, .field textarea:focus{ outline:none; border-color:var(--accent); }
+  .field textarea{ resize:vertical; min-height:110px; }
+  .contact-form .btn-primary{ width:100%; }
+
+  /* ---------- Footer ---------- */
+  footer{ background:var(--navy); color:#fff; padding-top:64px; }
+  .footer-grid{
+    display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:40px;
+    padding-bottom:44px; border-bottom:1px solid rgba(255,255,255,0.1);
+  }
+  .footer-brand{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .footer-brand img{ height:44px; }
+  .footer-brand span{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; }
+  footer .col h4{
+    font-family:'Baloo 2',sans-serif; font-size:15px; margin-bottom:18px; color:#fff;
+  }
+  footer .col a, footer .col p{
+    display:block; color:rgba(255,255,255,0.65); font-size:14.5px; margin-bottom:12px; line-height:1.6;
+  }
+  footer .col a:hover{ color:#fff; }
+  footer p{ color:rgba(255,255,255,0.55); }
+  .socials{ display:flex; gap:12px; margin-top:6px; }
+  .socials a{
+    width:38px; height:38px; border-radius:0; background:rgba(255,255,255,0.08);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .socials a:hover{ background:var(--accent); }
+  .footer-bottom{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:22px 0; font-size:13px; color:rgba(255,255,255,0.5); flex-wrap:wrap; gap:10px;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 980px){
+    .nav-links{ display:none; }
+    .nav-toggle{ display:flex; }
+    .mobile-menu{
+      display:none; flex-direction:column; gap:2px; background:#fff;
+      border-top:1px solid rgba(40,26,57,0.08); padding:10px 32px 18px;
+    }
+    .mobile-menu.open{ display:flex; }
+    .mobile-menu a{
+      padding:12px 0; font-weight:600; font-size:15.5px; color:var(--navy);
+      border-bottom:1px solid rgba(40,26,57,0.06);
+    }
+    .hero h1{ font-size:38px; }
+    .about-grid{ grid-template-columns:1fr; }
+    .about-photos{ max-width:460px; margin:0 auto; }
+    .services-grid{ grid-template-columns:1fr 1fr; }
+    .reviews-grid{ grid-template-columns:1fr 1fr; }
+    .transformation{ grid-template-columns:1fr; }
+    .contact-grid{ grid-template-columns:1fr; }
+    .footer-grid{ grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width: 640px){
+    .wrap{ padding:0 20px; }
+    .nav{ padding:12px 20px; }
+    .hero{ padding:56px 0 64px; }
+    .hero h1{ font-size:30px; }
+    .hero p.lead{ font-size:16.5px; }
+    .services-grid{ grid-template-columns:1fr; }
+    .reviews-grid{ grid-template-columns:1fr; }
+    .reviews .section-head h2{ font-size:32px; }
+    .footer-grid{ grid-template-columns:1fr; }
+    .section{ padding:64px 0; }
+    .form-row{ grid-template-columns:1fr; }
+    .contact-form{ padding:28px; }
+    .transformation{ padding:28px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="#top" class="brand">
+      <img src="assets/logo.png" alt="Moore Movement Personal Training logo">
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://www.instagram.com/noahmoorept/" target="_blank" rel="noopener" class="icon-link" aria-label="Instagram">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="0"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+      </a>
+      <a href="#contact" class="nav-cta">Contact Today</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#reviews">Reviews</a>
+    <a href="#contact">Contact</a>
+    <a href="https://www.instagram.com/noahmoorept/" target="_blank" rel="noopener">Instagram</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <h1>Train with purpose at <span>Moore Movement</span> Personal Training</h1>
+      <p class="lead">1:1 coaching in Mount Pleasant, Ballarat with Noah &mdash; built around your goals, your confidence and your consistency.</p>
+      <div class="hero-ctas">
+        <a href="#contact" class="btn btn-primary">Contact Today</a>
+        <a href="#services" class="btn btn-secondary">See Our Services</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section about" id="about">
+    <div class="wrap about-grid">
+      <div class="about-photos">
+        <img class="tall" src="assets/ig-sled-push.jpg" alt="Client doing a sled push session at Moore Movement Personal Training">
+        <img class="short" src="assets/contact-photo.jpg" alt="Noah Moore coaching a client at Moore Movement Personal Training">
+        <img class="short" src="assets/ig-bench-spot.jpg" alt="Training session at Moore Movement Personal Training">
+      </div>
+      <div class="about-copy">
+        <span class="eyebrow-text">Introducing Noah</span>
+        <h2>Empowering Transformation Through Personalised Fitness</h2>
+        <p>Noah is a well developed coach who has been involved within the fitness industry for over 3 years. Noah finds a true passion in helping his clients gain confidence in and out of the gym, and strides to help his clients achieve their goals.</p>
+        <p>Through his own personal challenges with self confidence he has found a passion in working with clients who have been in that boat and helping them grow and be confident in themselves.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section services" id="services">
+    <div class="wrap">
+      <div class="section-head center">
+        <h2>Our Services</h2>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10"/><path d="M4 9v6"/><path d="M18 7v10"/><path d="M20 9v6"/><path d="M6 12h12"/></svg></div>
+          <h3>1:1 Personal Training</h3>
+          <p>Our sessions are designed to meet your specific fitness needs, focusing on strength, endurance, and overall wellness. Each session is crafted to help you achieve your fitness goals efficiently and effectively. The First Session is completely FREE.</p>
+          <a href="#contact" class="service-link">Book Now!</a>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.2c2.7.5 4.5 2.7 4.5 5.8"/></svg></div>
+          <h3>Group Fitness</h3>
+          <p>Group fitness sessions curated with every individual thought of to make every session as challenging but effective for all participants.</p>
+          <a href="#contact" class="service-link">Book Now!</a>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="0"/><path d="M9 3.5h6v2H9z"/><path d="M8.5 12h7"/><path d="M8.5 16h7"/><path d="M8.5 8.5h4"/></svg></div>
+          <h3>Individualised Training Program</h3>
+          <p>Customised programs are designed to meet your specific fitness needs, focusing on strength, endurance, and overall wellness. Each program is crafted to help you achieve your fitness goals efficiently and effectively.</p>
+          <a href="#contact" class="service-link">Book Now!</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="reviews" id="reviews">
+    <div class="wrap">
+      <div class="section-head center">
+        <h2>What Our Clients Are Saying</h2>
+        <div class="review-summary-line">
+          <span class="stars">★★★★★</span>
+          <span class="score">4.9 out of 5</span>
+          <span>&middot;</span>
+          <a href="https://mmpt.setmore.com" target="_blank" rel="noopener">Read all 39 reviews on Google</a>
+        </div>
+      </div>
+
+      <!-- Client Transformation Spotlight -->
+      <div class="transformation">
+        <div class="carousel" id="transformCarousel">
+          <div class="carousel-track">
+            <img src="assets/lucas-1.png" alt="Lucas Boland transformation, front view, 85kg to 73kg" class="active">
+            <img src="assets/lucas-2.png" alt="Lucas Boland transformation, front flex, 85kg to 73kg">
+            <img src="assets/lucas-3.png" alt="Lucas Boland transformation, side view, 85kg to 73kg">
+            <img src="assets/lucas-4.png" alt="Lucas Boland transformation, back view, 85kg to 73kg">
+            <img src="assets/lucas-5.png" alt="Lucas Boland transformation, back flex, 85kg to 73kg">
+          </div>
+          <button class="carousel-arrow prev" aria-label="Previous photo">&#8249;</button>
+          <button class="carousel-arrow next" aria-label="Next photo">&#8250;</button>
+          <div class="carousel-dots">
+            <button class="dot active" data-index="0" aria-label="Photo 1"></button>
+            <button class="dot" data-index="1" aria-label="Photo 2"></button>
+            <button class="dot" data-index="2" aria-label="Photo 3"></button>
+            <button class="dot" data-index="3" aria-label="Photo 4"></button>
+            <button class="dot" data-index="4" aria-label="Photo 5"></button>
+          </div>
+        </div>
+        <div>
+          <div class="stat-line"><span class="from">85kg</span><span class="arrow">→</span><span class="to">73kg</span></div>
+          <h3>Client Transformation: Lucas</h3>
+          <span class="stars">★★★★★</span>
+          <p>"Noah is an excellent PT, very constructive and knowledgeable and incredibly helpful when training in the gym."</p>
+          <div class="who">Lucas Boland &middot; from Google</div>
+        </div>
+      </div>
+
+      <div class="reviews-grid">
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"I came to sessions for the health benefits of strength and resistance training for women. I have been going for one month and I am already noticing improvements, including the disappearance of pain in a persistent lower back injury. Noah creates an enjoyable, safe space to workout."</p>
+          <div class="review-author">
+            <div class="avatar">E</div>
+            <div><div class="name">Emmeline</div><div class="src">Client testimonial</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"I've been training with Noah for a while now and honestly couldn't recommend him more. He's friendly, easy to get along with, and knows exactly how to push you without making it feel overwhelming. Every session is different and well planned."</p>
+          <div class="review-author">
+            <div class="avatar">H</div>
+            <div><div class="name">Heidy Hassan</div><div class="src">★ from Google</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"Noah has a fantastic ability to motivate and challenge our family during our fitness journey. He works with our son to improve his strength and confidence all while having fun. Thanks Noah, we appreciate you!"</p>
+          <div class="review-author">
+            <div class="avatar">K</div>
+            <div><div class="name">Kate Allen</div><div class="src">★ from Google</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"Having had a number of coaches over the years, I needed motivation, confidence and a coach who understands real life barriers. Noah has supported my return to the gym with an open mind and a supportive approach to my goals."</p>
+          <div class="review-author">
+            <div class="avatar">A</div>
+            <div><div class="name">Ashton</div><div class="src">Client testimonial</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"Noah is an awesome PT. He's really supportive, easy to get along with, and knows how to push you in a way that actually motivates you. If you're in Ballarat looking for a great personal trainer, I'd definitely recommend Noah."</p>
+          <div class="review-author">
+            <div class="avatar">I</div>
+            <div><div class="name">Isabella Murphy</div><div class="src">★ from Google</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"I've been working with Noah since November 2024. He has worked closely with me, targeting large muscle groups and consistently increasing my weights as I gain strength. Always friendly and accommodating, but not afraid to get the best out of me."</p>
+          <div class="review-author">
+            <div class="avatar">J</div>
+            <div><div class="name">Jo</div><div class="src">Client testimonial</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"Noah is such a friendly and supportive trainer. He always goes above and beyond to cater for his clients, making sure sessions are tailored to individual needs. Highly recommend if you're looking for a PT who genuinely cares about your goals!"</p>
+          <div class="review-author">
+            <div class="avatar">T</div>
+            <div><div class="name">Tess</div><div class="src">Client testimonial</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"Incredibly kind, understanding and respectful. Noah is the type of person that genuinely wants to see you push yourself to be the best version of you. He is there to see you succeed in your journey and enjoy it along the way."</p>
+          <div class="review-author">
+            <div class="avatar">J</div>
+            <div><div class="name">Jasmine</div><div class="src">Client testimonial</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"Noah has a genuine passion for getting results for his clients and working with them to achieve their goals. He has excellent knowledge of contemporary training methods and how to apply these."</p>
+          <div class="review-author">
+            <div class="avatar">S</div>
+            <div><div class="name">Simon</div><div class="src">Client testimonial</div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="reviews-more">
+        <a href="https://mmpt.setmore.com" target="_blank" rel="noopener" class="btn btn-secondary">See All 39 Reviews on Google</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT / LEAD FORM -->
+  <section class="section contact" id="contact">
+    <div class="wrap contact-grid">
+      <div class="contact-info">
+        <img class="contact-photo" src="assets/contact-photo.jpg" alt="Noah Moore coaching a client at Moore Movement Personal Training">
+        <h2>Contact Today</h2>
+        <p>Get in touch to book your session or ask a question &mdash; Noah will get back to you personally.</p>
+
+        <div class="contact-detail">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          <div><div class="label">Location</div><div class="value">898 Humffray St South, Mt Pleasant VIC</div></div>
+        </div>
+        <div class="contact-detail">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 6.2 2 2 0 0 1 5 4Z"/></svg>
+          <div><div class="label">Phone</div><div class="value">0434 084 812</div></div>
+        </div>
+        <div class="contact-detail">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="0"/><path d="M3 6l9 7 9-7"/></svg>
+          <div><div class="label">Email</div><div class="value">mooremovementpt@gmail.com</div></div>
+        </div>
+      </div>
+
+      <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you.html">
+        <input type="hidden" name="form-name" value="contact">
+        <p style="position:absolute; left:-9999px;">
+          <label>Leave this field blank: <input name="bot-field"></label>
+        </p>
+        <div class="form-row">
+          <div class="field">
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" name="firstName" required>
+          </div>
+          <div class="field">
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" name="lastName" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone">
+        </div>
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Tell Noah a bit about your goals..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="col">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="Moore Movement Personal Training logo">
+          <span>Moore Movement PT</span>
+        </div>
+        <p>1:1 personal training, group fitness and custom programs in Mount Pleasant, Ballarat.</p>
+        <div class="socials">
+          <a href="https://www.instagram.com/noahmoorept/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="0"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          </a>
+          <a href="mailto:mooremovementpt@gmail.com" aria-label="Email">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="0"/><path d="M3 6l9 7 9-7"/></svg>
+          </a>
+          <a href="tel:0434084812" aria-label="Call">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 6.2 2 2 0 0 1 5 4Z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="col">
+        <h4>Explore</h4>
+        <a href="#about">About Us</a>
+        <a href="#services">Our Services</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="col">
+        <h4>Get In Touch</h4>
+        <p>898 Humffray Street South<br>Mount Pleasant VIC 3350</p>
+        <a href="tel:0434084812">0434 084 812</a>
+        <a href="mailto:mooremovementpt@gmail.com">mooremovementpt@gmail.com</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Moore Movement Personal Training. All rights reserved.</span>
+      <span>Mount Pleasant, Ballarat VIC</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const navToggle = document.getElementById('navToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  navToggle.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', isOpen);
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+  }));
+
+  const carousel = document.getElementById('transformCarousel');
+  const slides = carousel.querySelectorAll('.carousel-track img');
+  const dots = carousel.querySelectorAll('.dot');
+  let current = 0;
+  function showSlide(i){
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = (i + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+  carousel.querySelector('.prev').addEventListener('click', () => showSlide(current - 1));
+  carousel.querySelector('.next').addEventListener('click', () => showSlide(current + 1));
+  dots.forEach(dot => dot.addEventListener('click', () => showSlide(parseInt(dot.dataset.index))));
+</script>
+</body>
+</html>
