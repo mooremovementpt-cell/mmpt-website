@@ -241,6 +241,14 @@
   }
   .field input:focus, .field textarea:focus{ outline:none; border-color:var(--accent); }
   .field textarea{ resize:vertical; min-height:110px; }
+  .phone-group{ display:flex; }
+  .phone-group .phone-prefix{
+    display:flex; align-items:center; border:1.5px solid rgba(40,26,57,0.15); border-right:none;
+    padding:13px 10px 13px 16px; font-family:'Quicksand',sans-serif; font-size:15px; font-weight:700;
+    color:var(--navy); background:var(--cream); user-select:none; flex-shrink:0;
+  }
+  .phone-group input{ border-left:none; padding-left:6px; }
+  .phone-group input:focus{ border-left:none; }
   .contact-form .btn-primary{ width:100%; }
 
   /* ---------- Footer ---------- */
@@ -578,7 +586,11 @@
         </div>
         <div class="field">
           <label for="phone">Phone<span class="required">*</span></label>
-          <input type="tel" id="phone" name="phone" value="+61 " placeholder="+61 4XX XXX XXX" pattern="^\+61(\s?[0-9]){9}$" title="Enter an Australian number in +61 format, e.g. +61 412 345 678" required>
+          <div class="phone-group">
+            <span class="phone-prefix">+61</span>
+            <input type="tel" id="phone" placeholder="4XX XXX XXX" pattern="^([0-9]\s?){9}$" title="Enter an Australian number, e.g. 412 345 678" required>
+          </div>
+          <input type="hidden" id="phoneFull" name="phone">
         </div>
         <div class="field">
           <label for="message">Message<span class="required">*</span></label>
@@ -645,6 +657,12 @@
     mobileMenu.classList.remove('open');
     navToggle.setAttribute('aria-expanded', 'false');
   }));
+
+  const phoneInput = document.getElementById('phone');
+  const phoneFull = document.getElementById('phoneFull');
+  function syncPhoneFull(){ phoneFull.value = '+61 ' + phoneInput.value.trim(); }
+  phoneInput.addEventListener('input', syncPhoneFull);
+  syncPhoneFull();
 
   const carousel = document.getElementById('transformCarousel');
   const slides = carousel.querySelectorAll('.carousel-track img');
