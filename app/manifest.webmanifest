@@ -1,0 +1,9 @@
+{
+  "name": "Moore Movement Coach",
+  "short_name": "MMPT Coach",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F1F8FC",
+  "theme_color": "#281A39",
+  "icons": [{ "src": "../assets/logo.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }]
+}
