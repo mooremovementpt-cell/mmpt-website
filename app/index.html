@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MMPT Coach</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#281A39">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap">
+<style>
+/* Layout: coaching console — square-cornered brand cards, sidebar on desktop, bottom tab bar on phone */
+:root{
+  --bg:#F1F8FC; --surface:#FFFFFF; --sunk:#E3F6FD; --fg:#281A39; --muted:#5C5270; --line:#D5E7F0;
+  --accent:#2FA3E0; --accent-ink:#1C7FB8; --on-accent:#FFFFFF; --sky:#BDE9FB; --star:#FFA733;
+  --good:#1E9E6A; --warn:#C77A0A; --bad:#D2443B; --good-bg:#DDF5EA; --warn-bg:#FCEFD8; --bad-bg:#FBE3E1;
+  --navy:#281A39; --on-navy:#FFFFFF;
+  --f-display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Quicksand", "Segoe UI", system-ui, sans-serif;
+  --shadow:0 10px 28px rgba(40,26,57,.08);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#140E1E; --surface:#1E1630; --sunk:#271E3B; --fg:#F2EEF8; --muted:#B4AAC6; --line:#33294A;
+  --accent:#4DB8F0; --accent-ink:#7CCBF5; --on-accent:#0F0A17; --sky:#1F3A52; --star:#FFB75A;
+  --good:#4CC99A; --warn:#F0B04A; --bad:#F27A70; --good-bg:#16352B; --warn-bg:#3A2C14; --bad-bg:#3D1E1D;
+  --navy:#0E0916; --on-navy:#F2EEF8; --shadow:0 10px 28px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#140E1E; --surface:#1E1630; --sunk:#271E3B; --fg:#F2EEF8; --muted:#B4AAC6; --line:#33294A;
+  --accent:#4DB8F0; --accent-ink:#7CCBF5; --on-accent:#0F0A17; --sky:#1F3A52; --star:#FFB75A;
+  --good:#4CC99A; --warn:#F0B04A; --bad:#F27A70; --good-bg:#16352B; --warn-bg:#3A2C14; --bad-bg:#3D1E1D;
+  --navy:#0E0916; --on-navy:#F2EEF8; --shadow:0 10px 28px rgba(0,0,0,.35); color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:500 15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--navy)}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;margin:0;text-wrap:balance;font-weight:700}
+h1{font-size:1.9rem} h2{font-size:1.35rem} h3{font-size:1.1rem}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ic{width:20px;height:20px;flex:none}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+
+/* shell */
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
+.side{background:var(--navy);color:var(--on-navy);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;padding-left:max(14px,env(safe-area-inset-left,0px))}
+.brand{display:flex;flex-direction:column;padding:4px 10px 18px}
+.brand b{font-family:var(--f-display);font-size:1.35rem;font-weight:800;letter-spacing:.01em;line-height:1}
+.brand span{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin-top:4px}
+.nav{display:flex;align-items:center;gap:12px;padding:10px 12px;border:0;background:none;color:inherit;opacity:.78;text-align:left;width:100%;font-weight:700}
+.nav:hover{opacity:1;background:rgba(255,255,255,.06)}
+.nav.on{opacity:1;background:var(--accent);color:var(--on-accent)}
+.nav .badge{margin-left:auto}
+.side .spacer{flex:1}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;background:var(--star);color:#281A39;font-size:.72rem;font-weight:700;border-radius:10px}
+.tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;padding:6px 2px;font-size:.68rem;font-weight:700;color:var(--muted);position:relative}
+.tab.on{color:var(--accent-ink)}
+.tab .badge{position:absolute;top:0;left:55%;min-width:16px;height:16px;font-size:.62rem}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--bg);display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding-block:12px;border-bottom:1px solid var(--line)}
+.top .mbrand{display:none;font-family:var(--f-display);font-weight:800;font-size:1.15rem}
+.top .grow{flex:1}
+main{min-width:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:110px}
+.page{max-width:1120px;margin:0 auto;padding-top:22px;display:flex;flex-direction:column;gap:22px}
+@media (max-width:899px){
+  .shell{grid-template-columns:minmax(0,1fr)} .side{display:none} .tabbar{display:flex} .top .mbrand{display:block}
+  h1{font-size:1.55rem}
+}
+@media (max-width:560px){.top{gap:8px}.top .mbrand{font-size:1rem}.asl .muted{display:none}.seg button{padding:6px 9px}}
+
+/* controls */
+.seg{display:inline-flex;background:var(--sunk);padding:3px;gap:3px}
+.seg button{border:0;background:none;padding:6px 12px;font-weight:700;font-size:.85rem;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--fg);background:transparent;padding:9px 16px;font-weight:700;font-size:.9rem;white-space:nowrap}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{border-color:transparent}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn.sm{padding:5px 10px;font-size:.8rem}
+.btn.block{width:100%}
+.iconbtn{border:0;background:none;padding:6px;display:inline-grid;place-items:center;color:var(--muted)}
+.iconbtn:hover{color:var(--fg);background:var(--sunk)}
+input[type=text],input[type=number],input[type=date],input[type=time],input[type=email],input[type=tel],input:not([type]),select,textarea{
+  width:100%;padding:9px 11px;background:var(--surface);border:1.5px solid var(--line);border-radius:0;min-width:0}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none}
+textarea{resize:vertical;min-height:84px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field > span{font-size:.8rem;font-weight:700;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.grid2,.grid3{grid-template-columns:minmax(0,1fr)}}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--surface);padding:5px 12px;font-size:.82rem;font-weight:700;color:var(--muted)}
+.chip.on{border-color:var(--fg);color:var(--fg);background:var(--sunk)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;padding:2px 9px;letter-spacing:.03em;white-space:nowrap}
+.pill.active,.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.paused,.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.lead{background:var(--sky);color:var(--accent-ink)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.plain{background:var(--sunk);color:var(--muted)}
+
+/* surfaces */
+.card{background:var(--surface);border:1px solid var(--line);padding:18px;min-width:0}
+.card.pad0{padding:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.row.wrap{flex-wrap:wrap}
+.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:12px}
+.cols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:980px){.cols{grid-template-columns:minmax(0,1fr)}}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.head p{margin:4px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi b{font-family:var(--f-display);font-size:1.9rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi.hero{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.kpi.hero .label{color:inherit;opacity:.7}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li .main{flex:1;min-width:0}
+.li .main b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li .main small{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
+.li.click{cursor:pointer;padding-inline:10px;margin-inline:-10px}
+.li.click:hover{background:var(--sunk)}
+.av{width:40px;height:40px;flex:none;display:grid;place-items:center;background:var(--sky);color:var(--accent-ink);font-family:var(--f-display);font-weight:800;font-size:.95rem}
+.av.lg{width:64px;height:64px;font-size:1.4rem}
+.time{font-family:var(--f-display);font-weight:700;width:54px;flex:none;font-variant-numeric:tabular-nums}
+.empty{padding:22px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);font-size:.9rem}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 14px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--fg);border-bottom-color:var(--accent)}
+.flag{width:4px;align-self:stretch;flex:none}
+.flag.bad{background:var(--bad)} .flag.warn{background:var(--warn)} .flag.info{background:var(--accent)}
+
+/* charts */
+.chart{width:100%;height:auto;display:block}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .axis{fill:var(--muted);font-size:11px;font-family:var(--f-body);font-weight:600}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart .ar{fill:var(--accent);opacity:.12}
+.chart .dot{fill:var(--surface);stroke:var(--accent);stroke-width:2}
+.chart .end{fill:var(--accent)}
+.chart .endl{fill:var(--fg);font-size:12px;font-weight:700;font-family:var(--f-body)}
+.bar{height:8px;background:var(--sunk);position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--accent)}
+.hgrid{display:grid;grid-template-columns:minmax(0,1fr) repeat(7,26px);gap:6px 4px;align-items:center;font-size:.85rem}
+.hgrid .d{width:22px;height:22px;justify-self:center;border:1.5px solid var(--line)}
+.hgrid .d.y{background:var(--good);border-color:var(--good)}
+.hgrid .dh{font-size:.68rem;text-align:center;color:var(--muted);font-weight:700}
+.stat3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stat3 div{display:flex;flex-direction:column}
+.stat3 b{font-family:var(--f-display);font-size:1.4rem;font-variant-numeric:tabular-nums}
+
+/* week */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day{background:var(--surface);border:1px solid var(--line);min-height:150px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.day.today{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.day h4{font-size:.95rem;display:flex;justify-content:space-between;align-items:baseline}
+.sess{background:var(--sunk);padding:6px 8px;font-size:.8rem;cursor:pointer;border-left:3px solid var(--accent);min-width:0}
+.sess b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sess.done{opacity:.55;border-left-color:var(--good)}
+@media (max-width:899px){.week{grid-template-columns:minmax(0,1fr)} .day{min-height:0}}
+
+/* program builder */
+.ptable{width:100%;border-collapse:collapse;font-size:.9rem}
+.ptable th{text-align:left;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 6px;font-weight:700}
+.ptable td{padding:5px 6px;border-top:1px solid var(--line);vertical-align:middle}
+.ptable input{padding:6px 8px}
+.ptable .w-s{width:64px} .ptable .w-r{width:120px} .ptable .w-rest{width:78px}
+.scroll-x{overflow-x:auto}
+.daycard{border:1px solid var(--line);background:var(--surface)}
+.daycard > .dh{display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--sunk)}
+.daycard > .dh input{font-family:var(--f-display);font-weight:700;font-size:1.05rem;background:transparent;border-color:transparent;padding:4px 6px}
+.daycard > .dh input:focus{background:var(--surface)}
+.daycard .db{padding:8px 14px 14px}
+.exgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.ex{background:var(--surface);border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:6px}
+.ex p{margin:0;font-size:.86rem;color:var(--muted)}
+
+/* chat */
+.inbox{display:grid;grid-template-columns:300px minmax(0,1fr);border:1px solid var(--line);background:var(--surface);min-height:520px}
+.inbox .convs{border-right:1px solid var(--line);overflow:auto}
+.inbox .convs .li{padding:12px 14px;margin:0;cursor:pointer}
+.inbox .convs .li.on{background:var(--sunk)}
+@media (max-width:760px){.inbox{grid-template-columns:minmax(0,1fr)} .inbox.has-thread .convs{display:none} .inbox:not(.has-thread) .thread{display:none}}
+.thread{display:flex;flex-direction:column;min-width:0}
+.thread .th{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.msgs{flex:1;padding:16px;display:flex;flex-direction:column;gap:8px;overflow:auto;max-height:60vh;min-height:280px}
+.msg{max-width:78%;padding:9px 13px;background:var(--sunk);align-self:flex-start;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:var(--accent);color:var(--on-accent)}
+.msg small{display:block;font-size:.68rem;opacity:.7;margin-top:3px}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+
+/* client app */
+.hello{background:var(--navy);color:var(--on-navy);padding:22px;display:flex;flex-direction:column;gap:8px}
+.hello h1{font-size:1.7rem}
+.wcard{background:var(--accent);color:var(--on-accent);padding:20px;display:flex;flex-direction:column;gap:10px}
+.wcard .btn{border-color:currentColor;color:inherit;align-self:flex-start}
+.wcard .btn:hover{background:rgba(255,255,255,.15)}
+.habit{display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--line);background:var(--surface);width:100%;text-align:left;font-weight:700}
+.habit .box{width:26px;height:26px;border:2px solid var(--line);display:grid;place-items:center;flex:none;color:transparent}
+.habit.y{border-color:var(--good)}
+.habit.y .box{background:var(--good);border-color:var(--good);color:#fff}
+.setrow{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1fr) 44px;gap:8px;align-items:center;padding:6px 0}
+.setrow .n{font-family:var(--f-display);font-weight:700;color:var(--muted);text-align:center}
+.setrow label{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted);min-width:0}
+.setrow input{padding:8px;text-align:center;font-weight:700}
+.tick{width:44px;height:40px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--muted)}
+.setrow.done .tick{background:var(--good);border-color:var(--good);color:#fff}
+.setrow.done input{background:var(--good-bg)}
+.rating{display:flex;gap:6px}
+.rating label{flex:1}
+.rating input{position:absolute;opacity:0;pointer-events:none}
+.rating span{display:grid;place-items:center;height:40px;border:1.5px solid var(--line);font-weight:700;cursor:pointer;background:var(--surface)}
+.rating input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.rating input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+
+/* overlays */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(20,12,30,.55);display:grid;place-items:center;padding:16px}
+.sheet{background:var(--surface);width:min(560px,100%);max-height:88vh;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--fg);color:var(--bg);padding:10px 18px;font-weight:700;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.timer{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--navy);color:var(--on-navy);padding:12px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow)}
+.timer b{font-family:var(--f-display);font-size:1.6rem;font-variant-numeric:tabular-nums;line-height:1}
+.timer .btn{border-color:currentColor;color:inherit}
+.example{background:var(--warn-bg);color:var(--warn);padding:8px 12px;font-size:.84rem;font-weight:700;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(12px);opacity:.6}}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal" class="modal" hidden></div>
+<div id="toast" class="toast" hidden></div>
+<div id="timer" class="timer" hidden></div>
+<script>
+"use strict";
+/* ---------- utilities ---------- */
+const KEY = "mmpt-coach-v1";
+const uid = () => Math.random().toString(36).slice(2, 9);
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const TODAY = iso(new Date());
+const parseD = s => new Date(s + "T00:00:00");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtDate = s => parseD(s).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+const fmtShort = s => parseD(s).toLocaleDateString("en-AU", { day: "numeric", month: "short" });
+const fmtTime = t => { const [h, m] = t.split(":").map(Number); return `${((h + 11) % 12) + 1}:${pad(m)}${h < 12 ? "am" : "pm"}`; };
+const ago = ts => { const m = Math.round((Date.now() - ts) / 60000); if (m < 1) return "just now"; if (m < 60) return m + "m ago"; const h = Math.round(m / 60); if (h < 24) return h + "h ago"; return Math.round(h / 24) + "d ago"; };
+const daysBetween = (a, b) => Math.round((parseD(b) - parseD(a)) / 864e5);
+const money = n => "$" + Math.round(n).toLocaleString("en-AU");
+const initials = n => String(n).trim().split(/\s+/).map(w => w[0] || "").slice(0, 2).join("").toUpperCase();
+const weekStart = (off = 0) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + off * 7); return d; };
+
+const ICONS = {
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.6 3.5 6"/>',
+  clip: '<rect x="5" y="4" width="14" height="17" rx="1"/><path d="M9 4V2.5h6V4M8.5 10h7M8.5 14h7M8.5 18h4"/>',
+  cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="1"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>',
+  dumb: '<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+  chart: '<path d="M4 20V4M4 20h16M8 16l4-5 3 3 5-7"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  ci: '<rect x="5" y="4" width="14" height="17" rx="1"/><path d="M9 4V2.5h6V4M8.5 13l2.5 2.5 4.5-5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  back: '<path d="M15 5l-7 7 7 7"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/>',
+  play: '<path d="M7 4.5v15l12-7.5z"/>',
+  send: '<path d="M3 11.5L21 3l-6.5 18-3-7.5z"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  left: '<path d="M15 5l-7 7 7 7"/>', right: '<path d="M9 5l7 7-7 7"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="1"/><path d="M16 8V4H4v12h4"/>'
+};
+const ic = n => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
+
+/* ---------- example data ---------- */
+function seed() {
+  const d = n => iso(addDays(new Date(), n));
+  let s = 11; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const exList = [
+    ["Back Squat", "Legs", "Barbell", "Brace hard, sit between the hips, drive the floor away."],
+    ["Goblet Squat", "Legs", "Dumbbell", "Elbows inside knees, chest tall, full depth."],
+    ["Romanian Deadlift", "Posterior chain", "Barbell", "Soft knees, push hips back, bar stays on the legs."],
+    ["Trap Bar Deadlift", "Posterior chain", "Trap bar", "Push the floor, stand tall, no lean back at lockout."],
+    ["Walking Lunge", "Legs", "Dumbbell", "Long step, back knee kisses the floor."],
+    ["Bulgarian Split Squat", "Legs", "Dumbbell", "Front shin vertical-ish, lean slightly forward for glutes."],
+    ["Hip Thrust", "Glutes", "Barbell", "Chin tucked, ribs down, squeeze 1s at the top."],
+    ["Leg Press", "Legs", "Machine", "Full range without the low back peeling off the pad."],
+    ["Bench Press", "Chest", "Barbell", "Shoulder blades pinned, bar to lower chest, leg drive."],
+    ["Incline DB Press", "Chest", "Dumbbell", "30° bench, elbows 45°, control the eccentric."],
+    ["Push-up", "Chest", "Bodyweight", "Plank position the whole way, chest touches first."],
+    ["Seated Cable Row", "Back", "Cable", "Lead with elbows, pause at the ribs."],
+    ["Lat Pulldown", "Back", "Cable", "Pull elbows to back pockets, no swinging."],
+    ["Chin-up", "Back", "Bodyweight", "Dead hang start, chest to bar, slow negative."],
+    ["Single-arm DB Row", "Back", "Dumbbell", "Flat back, row to the hip."],
+    ["Overhead Press", "Shoulders", "Barbell", "Squeeze glutes, head through at the top."],
+    ["Lateral Raise", "Shoulders", "Dumbbell", "Lead with elbows, stop at shoulder height."],
+    ["Face Pull", "Shoulders", "Cable", "Pull to the eyes, thumbs back."],
+    ["Sled Push", "Conditioning", "Sled", "Low hips, arms locked, short fast steps."],
+    ["Kettlebell Swing", "Conditioning", "Kettlebell", "Hinge, snap the hips, bell floats to chest height."],
+    ["Farmer Carry", "Conditioning", "Dumbbell", "Tall posture, slow controlled steps."],
+    ["Assault Bike Intervals", "Conditioning", "Air bike", "All-out on the work interval, easy spin on rest."],
+    ["Plank", "Core", "Bodyweight", "Squeeze glutes and quads, ribs down."],
+    ["Dead Bug", "Core", "Bodyweight", "Low back glued to the floor, exhale fully."]
+  ];
+  const exercises = exList.map(([name, muscle, equipment, cue], i) => ({ id: "e" + i, name, muscle, equipment, cue }));
+  const ex = n => exercises.find(e => e.name === n).id;
+  const it = (n, sets, reps, rest = 90) => ({ exId: ex(n), sets, reps, rest });
+  const programs = [
+    { id: "p1", name: "Strength Foundations", weeks: 8, desc: "Three days built around the big lifts. Add 2.5kg once every set hits the top of the rep range.", days: [
+      { name: "Day A · Lower", items: [it("Back Squat", 4, "6-8", 150), it("Romanian Deadlift", 3, "8-10", 120), it("Bulgarian Split Squat", 3, "10 each", 90), it("Plank", 3, "40s", 45)] },
+      { name: "Day B · Upper", items: [it("Bench Press", 4, "6-8", 150), it("Single-arm DB Row", 3, "10 each", 90), it("Overhead Press", 3, "8", 120), it("Face Pull", 3, "15", 60)] },
+      { name: "Day C · Full body", items: [it("Trap Bar Deadlift", 4, "5", 150), it("Incline DB Press", 3, "10", 90), it("Lat Pulldown", 3, "10-12", 90), it("Farmer Carry", 3, "30m", 60)] }] },
+    { id: "p2", name: "Fat Loss Conditioning", weeks: 6, desc: "Strength work with short rests, finished with a sled or bike burner.", days: [
+      { name: "Session 1 · Push + sled", items: [it("Goblet Squat", 3, "12", 60), it("Push-up", 3, "AMRAP", 60), it("Kettlebell Swing", 4, "15", 45), it("Sled Push", 6, "20m", 60)] },
+      { name: "Session 2 · Pull + bike", items: [it("Hip Thrust", 3, "12", 60), it("Seated Cable Row", 3, "12", 60), it("Walking Lunge", 3, "20 steps", 60), it("Assault Bike Intervals", 8, "20s on/40s off", 40)] },
+      { name: "Session 3 · Full body", items: [it("Leg Press", 3, "15", 60), it("Lat Pulldown", 3, "12", 60), it("Lateral Raise", 3, "15", 45), it("Dead Bug", 3, "10 each", 45)] }] }
+  ];
+  const habits = [
+    { id: "h1", name: "Hit 10,000 steps" }, { id: "h2", name: "Drink 2.5L water" }, { id: "h3", name: "Sleep 7+ hours" },
+    { id: "h4", name: "Protein at every meal" }, { id: "h5", name: "10 min mobility" }
+  ];
+  const wseries = (a, b, n) => Array.from({ length: n }, (_, i) => ({ date: d(-(n - 1 - i) * 7), kg: +(a + (b - a) * i / Math.max(1, n - 1) + (rnd() - .5) * .6).toFixed(1) }));
+  const clients = [
+    { id: "c1", name: "Jess Taylor", goal: "Drop 8kg before her wedding in March", email: "jess@example.com", phone: "0400 000 001", start: d(-63), status: "active", programId: "p2", habits: ["h1", "h2", "h4"], pkg: { name: "10-session pack", monthly: 520, left: 2 }, notes: "Left knee gets cranky on deep lunges, swap to reverse lunge. Loves sled work.", weights: wseries(78.4, 74.6, 10) },
+    { id: "c2", name: "Liam Nguyen", goal: "First strict chin-up and +5kg lean mass", email: "liam@example.com", phone: "0400 000 002", start: d(-49), status: "active", programId: "p1", habits: ["h3", "h4"], pkg: { name: "2x weekly PT", monthly: 780, left: 6 }, notes: "Eats like a bird. Push 3 meals + 1 snack minimum.", weights: wseries(68.2, 70.1, 8) },
+    { id: "c3", name: "Sarah Mitchell", goal: "Return to running after ACL rehab", email: "sarah@example.com", phone: "0400 000 003", start: d(-120), status: "paused", programId: "p1", habits: ["h5", "h3"], pkg: { name: "Weekly PT", monthly: 390, left: 0 }, notes: "On pause while overseas, back mid-December.", weights: wseries(64.0, 63.5, 5).map(w => ({ ...w, date: iso(addDays(parseD(w.date), -30)) })) },
+    { id: "c4", name: "Tom Riley", goal: "Strength base for footy preseason", email: "tom@example.com", phone: "0400 000 004", start: d(-35), status: "active", programId: "p1", habits: ["h1", "h3", "h4"], pkg: { name: "2x weekly PT", monthly: 780, left: 5 }, notes: "Hamstring tweak last season, extra RDL volume.", weights: wseries(84.0, 86.2, 6) },
+    { id: "c5", name: "Priya Shah", goal: "Build confidence in the gym", email: "priya@example.com", phone: "0400 000 005", start: d(0), status: "lead", programId: null, habits: ["h1"], pkg: { name: "Free trial", monthly: 0, left: 1 }, notes: "Found us on Instagram. Nervous about gyms, keep the trial low-key.", weights: [] }
+  ];
+  const habitLogs = {};
+  const rates = { c1: .8, c2: .65, c4: .55 };
+  for (const c of clients) {
+    if (!rates[c.id]) continue;
+    habitLogs[c.id] = {};
+    for (let i = -7; i <= -1; i++) habitLogs[c.id][d(i)] = c.habits.filter(() => rnd() < rates[c.id]);
+  }
+  const S = (cid, day, time, type = "PT 1:1", done = false) => ({ id: uid(), clientId: cid, date: d(day), time, type, done });
+  const sessions = [S("c2", -2, "17:30", "PT 1:1", true), S("c4", -1, "07:00", "PT 1:1", true), S("c1", 0, "06:00"), S("c4", 0, "07:00"), S("c2", 0, "17:30"),
+    S("c5", 1, "16:00", "Trial session"), S("c1", 2, "06:00"), S("c2", 2, "17:30"), S("c4", 3, "07:00"), S("c1", 4, "06:00", "Body comp check")];
+  const checkins = [
+    { id: uid(), clientId: "c1", date: d(-1), weight: 74.6, sleep: 4, energy: 4, stress: 3, adherence: 85, wins: "Hit my steps 6 of 7 days. The dress fits!", struggles: "Weekend drinks at a 30th.", reviewed: false, reply: "" },
+    { id: uid(), clientId: "c4", date: d(0), weight: 86.2, sleep: 3, energy: 3, stress: 2, adherence: 70, wins: "Squat felt strong at 110kg.", struggles: "Work travel Thu–Fri, missed a session.", reviewed: false, reply: "" },
+    { id: uid(), clientId: "c2", date: d(-7), weight: 69.8, sleep: 4, energy: 5, stress: 2, adherence: 90, wins: "Got two slow chin-up negatives.", struggles: "Hard to eat enough on work days.", reviewed: true, reply: "Big week mate. Pack two extra snacks for work days, we'll test a full chin-up next Thursday." }
+  ];
+  const now = Date.now(), H = 36e5;
+  const messages = {
+    c1: [{ from: "coach", text: "Great session this morning Jess, sled times are dropping.", ts: now - 26 * H, read: true },
+         { from: "client", text: "Thanks! Legs are cooked 😅 Can we move Thursday to 6:30?", ts: now - 3 * H, read: false }],
+    c2: [{ from: "client", text: "What should I eat before evening sessions?", ts: now - 50 * H, read: true },
+         { from: "coach", text: "Rice, chicken and fruit about 2 hours before. Banana 30 min out if you're hungry.", ts: now - 48 * H, read: true }],
+    c4: [{ from: "client", text: "Flying back Friday, will do the Day C session in the hotel gym.", ts: now - 30 * H, read: false }]
+  };
+  const wl = (cid, pid, dayIdx, day) => {
+    const p = programs.find(x => x.id === pid);
+    return { id: uid(), clientId: cid, programId: pid, dayIdx, date: d(day), sets: p.days[dayIdx].items.map((itm, i) =>
+      Array.from({ length: itm.sets }, () => ({ kg: String(Math.round((20 + i * 7.5 + rnd() * 10) / 2.5) * 2.5), reps: String(parseInt(itm.reps) || 10), done: true }))) };
+  };
+  const workoutLogs = [wl("c2", "p1", 0, -9), wl("c2", "p1", 1, -5), wl("c2", "p1", 2, -2), wl("c1", "p2", 1, -4), wl("c1", "p2", 2, -2), wl("c4", "p1", 0, -6), wl("c4", "p1", 1, -1)];
+  return { v: 1, example: true, coachName: "Noah", exercises, programs, habits, clients, habitLogs, sessions, checkins, messages, workoutLogs };
+}
+function blank() { const s = seed(); return { v: 1, example: false, coachName: s.coachName, exercises: s.exercises, programs: [], habits: s.habits, clients: [], habitLogs: {}, sessions: [], checkins: [], messages: {}, workoutLogs: [] }; }
+
+let db = null;
+try { db = JSON.parse(localStorage.getItem(KEY)); } catch (e) { db = null; }
+if (!db || db.v !== 1) db = seed();
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { /* storage unavailable: keep working in memory */ } }
+
+const ui = { mode: "coach", view: "dashboard", sub: "programs", clientId: null, ctab: "overview", programId: null, inboxId: null, inboxTab: "messages",
+  as: (db.clients.find(c => c.status === "active") || db.clients[0] || {}).id || null, cview: "today", workout: null, timer: null,
+  clientQ: "", clientFilter: "all", libQ: "", libMuscle: "All", weekOff: 0, pickQ: "" };
+
+/* ---------- selectors ---------- */
+const C = id => db.clients.find(c => c.id === id);
+const PG = id => db.programs.find(p => p.id === id);
+const EX = id => db.exercises.find(e => e.id === id);
+const H = id => db.habits.find(h => h.id === id);
+const exName = id => (EX(id) || { name: "Deleted exercise" }).name;
+const logsFor = cid => db.workoutLogs.filter(l => l.clientId === cid).sort((a, b) => b.date.localeCompare(a.date));
+const lastWorkout = cid => logsFor(cid)[0];
+const unreadFrom = cid => (db.messages[cid] || []).filter(m => m.from === "client" && !m.read).length;
+const unreadClient = cid => (db.messages[cid] || []).filter(m => m.from === "coach" && m.readByClient === false).length;
+const totalUnread = () => db.clients.reduce((n, c) => n + unreadFrom(c.id), 0);
+const pendingCheckins = () => db.checkins.filter(c => !c.reviewed && C(c.clientId));
+function habitRate(cid, days = 7) {
+  const c = C(cid); if (!c || !c.habits.length) return null;
+  const logs = db.habitLogs[cid] || {}; let done = 0;
+  for (let i = 1; i <= days; i++) done += (logs[iso(addDays(new Date(), -i))] || []).filter(h => c.habits.includes(h)).length;
+  return Math.round(done / (c.habits.length * days) * 100);
+}
+function nextDayIdx(c) {
+  const p = PG(c.programId); if (!p || !p.days.length) return 0;
+  const l = logsFor(c.id).find(x => x.programId === p.id);
+  return l ? (l.dayIdx + 1) % p.days.length : 0;
+}
+function lastSetsFor(cid, exId) {
+  for (const l of logsFor(cid)) {
+    const p = PG(l.programId); if (!p || !p.days[l.dayIdx]) continue;
+    const idx = p.days[l.dayIdx].items.findIndex(x => x.exId === exId);
+    if (idx > -1 && l.sets[idx]) return { date: l.date, sets: l.sets[idx].filter(s => s.done) };
+  }
+  return null;
+}
+const statusPill = s => `<span class="pill ${s}">${{ active: "Active", paused: "Paused", lead: "Lead" }[s] || esc(s)}</span>`;
+
+/* ---------- shared pieces ---------- */
+function weightChart(ws) {
+  ws = [...ws].sort((a, b) => a.date.localeCompare(b.date));
+  if (ws.length < 2) return `<div class="empty">Log at least two weigh-ins to see the trend line.</div>`;
+  const W = 640, Ht = 220, L = 40, R = 56, T = 14, B = 26;
+  const ks = ws.map(w => w.kg);
+  const lo = Math.floor(Math.min(...ks) - 1), hi = Math.ceil(Math.max(...ks) + 1);
+  const t0 = parseD(ws[0].date).getTime(), t1 = parseD(ws[ws.length - 1].date).getTime();
+  const x = s => L + (W - L - R) * ((parseD(s).getTime() - t0) / ((t1 - t0) || 1));
+  const y = k => T + (Ht - T - B) * (1 - (k - lo) / (hi - lo));
+  const step = Math.max(1, Math.ceil((hi - lo) / 4));
+  let g = "";
+  for (let v = lo; v <= hi; v += step) g += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  const pts = ws.map(w => `${x(w.date).toFixed(1)},${y(w.kg).toFixed(1)}`).join(" ");
+  const last = ws[ws.length - 1];
+  return `<svg class="chart" viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Bodyweight trend from ${ws[0].kg}kg to ${last.kg}kg">${g}
+    <path class="ar" d="M${x(ws[0].date)},${Ht - B} L${pts} L${x(last.date)},${Ht - B} Z"/>
+    <polyline class="ln" points="${pts}"/>
+    ${ws.slice(0, -1).map(w => `<circle class="dot" r="3" cx="${x(w.date)}" cy="${y(w.kg)}"/>`).join("")}
+    <circle class="end" r="5" cx="${x(last.date)}" cy="${y(last.kg)}"/>
+    <text class="endl" x="${x(last.date) + 9}" y="${y(last.kg) + 4}">${last.kg}kg</text>
+    <text class="axis" x="${L}" y="${Ht - 6}">${fmtShort(ws[0].date)}</text>
+    <text class="axis" x="${W - R}" y="${Ht - 6}" text-anchor="end">${fmtShort(last.date)}</text></svg>`;
+}
+function weightStats(c) {
+  const ws = [...c.weights].sort((a, b) => a.date.localeCompare(b.date));
+  if (!ws.length) return "";
+  const ch = +(ws[ws.length - 1].kg - ws[0].kg).toFixed(1);
+  return `<div class="stat3"><div><span class="label">Start</span><b>${ws[0].kg}</b></div><div><span class="label">Current</span><b>${ws[ws.length - 1].kg}</b></div>
+    <div><span class="label">Change</span><b>${ch > 0 ? "+" : ""}${ch}kg</b></div></div>`;
+}
+function habitGrid(c, editable = false) {
+  if (!c.habits.length) return `<div class="empty">No habits assigned yet.</div>`;
+  const days = Array.from({ length: 7 }, (_, i) => iso(addDays(new Date(), i - 6)));
+  const logs = db.habitLogs[c.id] || {};
+  return `<div class="hgrid"><span></span>${days.map(d => `<span class="dh">${parseD(d).toLocaleDateString("en-AU", { weekday: "narrow" })}</span>`).join("")}
+    ${c.habits.map(h => `<span>${esc((H(h) || {}).name)}</span>${days.map(d => `<span class="d ${(logs[d] || []).includes(h) ? "y" : ""}" title="${fmtDate(d)}"></span>`).join("")}`).join("")}</div>`;
+}
+function thread(cid, me) {
+  const ms = db.messages[cid] || [];
+  return `<div class="msgs" id="msgs">${ms.length ? ms.map(m => `<div class="msg ${m.from === me ? "me" : ""}">${esc(m.text)}<small>${ago(m.ts)}</small></div>`).join("") : `<div class="empty">No messages yet. Say g'day.</div>`}</div>
+    <form class="composer" data-form="send" data-cid="${cid}" data-from="${me}"><input id="msg-${cid}-${me}" name="text" placeholder="Write a message" autocomplete="off" aria-label="Message"><button class="btn primary" aria-label="Send">${ic("send")}</button></form>`;
+}
+
+/* ---------- coach views ---------- */
+function vDashboard() {
+  const active = db.clients.filter(c => c.status === "active");
+  const ws = weekStart(), we = addDays(ws, 7);
+  const weekSess = db.sessions.filter(s => parseD(s.date) >= ws && parseD(s.date) < we);
+  const today = db.sessions.filter(s => s.date === TODAY && C(s.clientId)).sort((a, b) => a.time.localeCompare(b.time));
+  const mrr = db.clients.filter(c => c.status === "active").reduce((n, c) => n + (+c.pkg.monthly || 0), 0);
+  const att = [];
+  pendingCheckins().forEach(ci => att.push({ lvl: "info", cid: ci.clientId, t: `${C(ci.clientId).name} sent a check-in`, s: `${fmtDate(ci.date)} · ${ci.adherence}% nutrition adherence`, act: "openCheckins" }));
+  db.clients.forEach(c => {
+    if (unreadFrom(c.id)) att.push({ lvl: "info", cid: c.id, t: `${unreadFrom(c.id)} unread message${unreadFrom(c.id) > 1 ? "s" : ""} from ${c.name}`, s: (db.messages[c.id].filter(m => m.from === "client").slice(-1)[0] || {}).text || "", act: "openInbox" });
+    if (c.status === "active" && c.pkg.left <= 2) att.push({ lvl: c.pkg.left === 0 ? "bad" : "warn", cid: c.id, t: `${c.name}: ${c.pkg.left} session${c.pkg.left === 1 ? "" : "s"} left`, s: `${c.pkg.name} · time to renew`, act: "openClient" });
+    const lw = lastWorkout(c.id);
+    if (c.status === "active" && (!lw || daysBetween(lw.date, TODAY) >= 7)) att.push({ lvl: "warn", cid: c.id, t: `${c.name} hasn't trained in ${lw ? daysBetween(lw.date, TODAY) + " days" : "a while"}`, s: "Send a nudge", act: "openClient" });
+  });
+  const feed = [
+    ...db.workoutLogs.map(l => ({ d: l.date, cid: l.clientId, t: `completed ${((PG(l.programId) || { days: [] }).days[l.dayIdx] || { name: "a workout" }).name}` })),
+    ...db.checkins.map(c => ({ d: c.date, cid: c.clientId, t: "submitted a weekly check-in" }))
+  ].filter(f => C(f.cid)).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 6);
+  const hr = new Date().getHours();
+  return `<div class="head"><div><h1>${hr < 12 ? "Morning" : hr < 17 ? "Afternoon" : "Evening"}, ${esc(db.coachName)}</h1><p class="muted">${new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" })} · ${today.length} session${today.length === 1 ? "" : "s"} today</p></div>
+      <div class="row wrap"><button class="btn" data-act="addSession">${ic("cal")} Book session</button><button class="btn primary" data-act="addClient">${ic("plus")} Add client</button></div></div>
+    <div class="kpis">
+      <div class="kpi hero"><span class="label">Est. monthly revenue</span><b>${money(mrr)}</b><span class="small" style="opacity:.75">from ${active.length} active package${active.length === 1 ? "" : "s"}</span></div>
+      <div class="kpi"><span class="label">Active clients</span><b>${active.length}</b><span class="small muted">${db.clients.filter(c => c.status === "lead").length} lead${db.clients.filter(c => c.status === "lead").length === 1 ? "" : "s"} in pipeline</span></div>
+      <div class="kpi"><span class="label">Sessions this week</span><b>${weekSess.length}</b><span class="small muted">${weekSess.filter(s => s.done).length} completed</span></div>
+      <div class="kpi"><span class="label">To review</span><b>${pendingCheckins().length + totalUnread()}</b><span class="small muted">${pendingCheckins().length} check-ins · ${totalUnread()} messages</span></div>
+    </div>
+    <div class="cols">
+      <div class="stack">
+        <section class="card"><div class="card-h"><h2>Needs attention</h2><span class="pill plain">${att.length}</span></div>
+          ${att.length ? `<div class="list">${att.map(a => `<div class="li click" data-act="${a.act}" data-id="${a.cid}"><span class="flag ${a.lvl}"></span><div class="av">${initials(C(a.cid).name)}</div><div class="main"><b>${esc(a.t)}</b><small>${esc(a.s)}</small></div>${ic("right")}</div>`).join("")}</div>` : `<div class="empty">All clear. Nothing needs you right now.</div>`}
+        </section>
+        <section class="card"><div class="card-h"><h2>Client habits · last 7 days</h2></div>
+          <div class="stack">${active.map(c => { const r = habitRate(c.id); return `<div class="row"><div class="av">${initials(c.name)}</div><div style="flex:1;min-width:0"><div class="row between"><b>${esc(c.name)}</b><span class="num small muted">${r == null ? "No habits" : r + "%"}</span></div><div class="bar"><i style="width:${r || 0}%"></i></div></div></div>`; }).join("") || `<div class="empty">No active clients yet.</div>`}</div>
+        </section>
+      </div>
+      <div class="stack">
+        <section class="card"><div class="card-h"><h2>Today</h2><button class="btn sm ghost" data-act="go" data-v="schedule">Full week ${ic("right")}</button></div>
+          ${today.length ? `<div class="list">${today.map(s => `<div class="li"><span class="time">${fmtTime(s.time)}</span><div class="main"><b>${esc(C(s.clientId).name)}</b><small>${esc(s.type)}</small></div>${s.done ? `<span class="pill good">Done</span>` : `<button class="btn sm" data-act="completeSession" data-id="${s.id}">${ic("check")} Done</button>`}</div>`).join("")}</div>` : `<div class="empty">No sessions booked today.</div>`}
+        </section>
+        <section class="card"><div class="card-h"><h2>Recent activity</h2></div>
+          ${feed.length ? `<div class="list">${feed.map(f => `<div class="li"><div class="av">${initials(C(f.cid).name)}</div><div class="main"><b>${esc(C(f.cid).name)}</b><small>${esc(f.t)} · ${fmtShort(f.d)}</small></div></div>`).join("")}</div>` : `<div class="empty">Client workouts and check-ins will show here.</div>`}
+        </section>
+      </div>
+    </div>`;
+}
+
+function vClients() {
+  if (ui.clientId && C(ui.clientId)) return vClient(C(ui.clientId));
+  const q = ui.clientQ.toLowerCase();
+  const list = db.clients.filter(c => (ui.clientFilter === "all" || c.status === ui.clientFilter) && (!q || c.name.toLowerCase().includes(q) || c.goal.toLowerCase().includes(q)));
+  const count = s => db.clients.filter(c => s === "all" || c.status === s).length;
+  return `<div class="head"><div><h1>Clients</h1><p class="muted">${db.clients.length} total · ${count("active")} active</p></div><button class="btn primary" data-act="addClient">${ic("plus")} Add client</button></div>
+    <div class="row wrap"><div style="flex:1;min-width:200px"><input id="clientQ" data-search="clientQ" placeholder="Search by name or goal" value="${esc(ui.clientQ)}" aria-label="Search clients"></div>
+      <div class="chips">${[["all", "All"], ["active", "Active"], ["paused", "Paused"], ["lead", "Leads"]].map(([k, l]) => `<button class="chip ${ui.clientFilter === k ? "on" : ""}" data-act="clientFilter" data-v="${k}">${l} · ${count(k)}</button>`).join("")}</div></div>
+    <section class="card">${list.length ? `<div class="list">${list.map(c => { const lw = lastWorkout(c.id); return `<div class="li click" data-act="openClient" data-id="${c.id}"><div class="av">${initials(c.name)}</div>
+      <div class="main"><b>${esc(c.name)}</b><small>${esc(c.goal)}</small></div>
+      <div class="small muted" style="text-align:right;flex:none">${esc((PG(c.programId) || { name: "No program" }).name)}<br>${lw ? "Trained " + fmtShort(lw.date) : "No workouts yet"}</div>${statusPill(c.status)}</div>`; }).join("")}</div>`
+      : `<div class="empty">${db.clients.length ? "No clients match that search." : "Add your first client to start coaching them in the app."}</div>`}</section>`;
+}
+
+function vClient(c) {
+  const p = PG(c.programId);
+  const tabs = [["overview", "Overview"], ["program", "Program & habits"], ["checkins", "Check-ins"], ["notes", "Profile & notes"]];
+  let body = "";
+  if (ui.ctab === "overview") {
+    const logs = logsFor(c.id).slice(0, 5);
+    body = `<div class="cols"><div class="stack">
+        <section class="card"><div class="card-h"><h3>Bodyweight</h3><button class="btn sm" data-act="logWeight" data-id="${c.id}">${ic("plus")} Weigh-in</button></div>${weightStats(c)}${weightChart(c.weights)}</section>
+        <section class="card"><div class="card-h"><h3>Habits · last 7 days</h3><span class="num small muted">${habitRate(c.id) ?? 0}% hit</span></div>${habitGrid(c)}</section></div>
+      <div class="stack">
+        <section class="card"><div class="card-h"><h3>Package</h3></div><div class="stack"><div class="row between"><b>${esc(c.pkg.name)}</b><span class="num">${money(c.pkg.monthly)}/mo</span></div>
+          <div class="row between"><span class="muted">Sessions left</span><b class="num" style="font-size:1.4rem">${c.pkg.left}</b></div>
+          <div class="row"><button class="btn sm" data-act="pkgAdj" data-id="${c.id}" data-n="-1">Use 1 session</button><button class="btn sm" data-act="pkgAdj" data-id="${c.id}" data-n="10">+10 sessions</button></div></div></section>
+        <section class="card"><div class="card-h"><h3>Recent workouts</h3></div>${logs.length ? `<div class="list">${logs.map(l => { const pp = PG(l.programId); const n = l.sets.flat().filter(s => s.done).length; return `<div class="li"><div class="main"><b>${esc(pp && pp.days[l.dayIdx] ? pp.days[l.dayIdx].name : "Workout")}</b><small>${fmtDate(l.date)} · ${n} sets</small></div></div>`; }).join("")}</div>` : `<div class="empty">No workouts logged yet.</div>`}</section>
+      </div></div>`;
+  } else if (ui.ctab === "program") {
+    body = `<div class="cols"><section class="card"><div class="card-h"><h3>Training program</h3></div><div class="stack">
+        <label class="field"><span>Assigned program</span><select id="assign-${c.id}" data-change="assign" data-id="${c.id}"><option value="">None</option>${db.programs.map(x => `<option value="${x.id}" ${x.id === c.programId ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
+        ${p ? `<p class="muted" style="margin:0">${esc(p.desc)}</p>${p.days.map((dd, i) => `<div><div class="row between"><b>${esc(dd.name)}</b>${i === nextDayIdx(c) ? `<span class="pill lead">Up next</span>` : ""}</div><div class="small muted">${dd.items.map(x => `${esc(exName(x.exId))} ${x.sets}×${esc(x.reps)}`).join(" · ")}</div></div>`).join("")}
+          <div class="row wrap"><button class="btn sm" data-act="editProgram" data-id="${p.id}">Edit program</button><button class="btn sm" data-act="previewAs" data-id="${c.id}">${ic("play")} See client view</button></div>` : `<div class="empty">Pick a program above, or build one under Programs.</div>`}
+      </div></section>
+      <section class="card"><div class="card-h"><h3>Daily habits</h3></div><div class="stack">${db.habits.map(h => `<label class="row" style="cursor:pointer"><input type="checkbox" id="hab-${c.id}-${h.id}" data-change="habitAssign" data-id="${c.id}" data-h="${h.id}" ${c.habits.includes(h.id) ? "checked" : ""}> ${esc(h.name)}</label>`).join("")}
+        <form class="row" data-form="newHabit" data-id="${c.id}"><input id="newhabit" name="name" placeholder="New habit, e.g. 3 serves of veg" required aria-label="New habit"><button class="btn sm">Add</button></form></div></section></div>`;
+  } else if (ui.ctab === "checkins") {
+    const cis = db.checkins.filter(x => x.clientId === c.id).sort((a, b) => b.date.localeCompare(a.date));
+    body = cis.length ? `<div class="stack">${cis.map(checkinCard).join("")}</div>` : `<div class="empty">No check-ins yet. Clients submit them from their Check-in tab.</div>`;
+  } else {
+    body = `<div class="cols"><section class="card"><form class="stack" data-form="editClient" data-id="${c.id}">
+        <div class="grid2"><label class="field"><span>Name</span><input id="ec-name" name="name" value="${esc(c.name)}" required></label><label class="field"><span>Status</span><select id="ec-status" name="status">${["active", "paused", "lead"].map(s => `<option ${s === c.status ? "selected" : ""} value="${s}">${s[0].toUpperCase() + s.slice(1)}</option>`).join("")}</select></label></div>
+        <label class="field"><span>Goal</span><input id="ec-goal" name="goal" value="${esc(c.goal)}"></label>
+        <div class="grid2"><label class="field"><span>Email</span><input id="ec-email" type="email" name="email" value="${esc(c.email)}"></label><label class="field"><span>Phone</span><input id="ec-phone" type="tel" name="phone" value="${esc(c.phone)}"></label></div>
+        <div class="grid3"><label class="field"><span>Package</span><input id="ec-pkg" name="pkg" value="${esc(c.pkg.name)}"></label><label class="field"><span>Monthly $</span><input id="ec-mo" type="number" min="0" name="monthly" value="${c.pkg.monthly}"></label><label class="field"><span>Sessions left</span><input id="ec-left" type="number" min="0" name="left" value="${c.pkg.left}"></label></div>
+        <label class="field"><span>Coach notes (private)</span><textarea id="ec-notes" name="notes">${esc(c.notes)}</textarea></label>
+        <div class="row between wrap"><button class="btn primary">Save changes</button><button type="button" class="btn danger" data-act="deleteClient" data-id="${c.id}" data-confirm="Tap again to delete">${ic("trash")} Delete client</button></div></form></section>
+      <section class="card"><h3>Client since</h3><p class="muted">${fmtDate(c.start)} · ${Math.max(0, Math.round(daysBetween(c.start, TODAY) / 7))} weeks</p></section></div>`;
+  }
+  return `<div><button class="btn ghost sm" data-act="backClients">${ic("back")} All clients</button></div>
+    <div class="head"><div class="row"><div class="av lg">${initials(c.name)}</div><div style="min-width:0"><h1>${esc(c.name)}</h1><p class="muted">${esc(c.goal)}</p></div></div>
+      <div class="row wrap">${statusPill(c.status)}<button class="btn sm" data-act="openInbox" data-id="${c.id}">${ic("chat")} Message</button><button class="btn sm" data-act="addSession" data-id="${c.id}">${ic("cal")} Book</button></div></div>
+    <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" class="${ui.ctab === k ? "on" : ""}" data-act="ctab" data-v="${k}">${l}</button>`).join("")}</div>${body}`;
+}
+
+function checkinCard(ci) {
+  const c = C(ci.clientId);
+  const m = (l, v, max) => `<div><span class="label">${l}</span><b class="num" style="display:block;font-family:var(--f-display);font-size:1.25rem">${v}${max ? `<span class="small muted">/${max}</span>` : ""}</b></div>`;
+  return `<section class="card"><div class="card-h"><div class="row"><div class="av">${initials(c.name)}</div><div><b>${esc(c.name)}</b><div class="small muted">${fmtDate(ci.date)}</div></div></div>${ci.reviewed ? `<span class="pill good">Reviewed</span>` : `<span class="pill warn">Needs review</span>`}</div>
+    <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr))">${m("Weight", ci.weight + "kg")}${m("Sleep", ci.sleep, 5)}${m("Energy", ci.energy, 5)}${m("Stress", ci.stress, 5)}${m("Nutrition", ci.adherence + "%")}</div>
+    <div class="grid2" style="margin-top:12px"><div><span class="label">Wins</span><p style="margin:4px 0 0">${esc(ci.wins) || "—"}</p></div><div><span class="label">Struggles</span><p style="margin:4px 0 0">${esc(ci.struggles) || "—"}</p></div></div>
+    ${ci.reviewed ? (ci.reply ? `<div style="margin-top:12px;padding:10px 12px;background:var(--sunk)"><span class="label">Your reply</span><p style="margin:4px 0 0">${esc(ci.reply)}</p></div>` : "")
+      : `<form class="stack" style="margin-top:12px" data-form="reviewCheckin" data-id="${ci.id}"><textarea id="rv-${ci.id}" name="reply" placeholder="Feedback for ${esc(c.name.split(" ")[0])} (also sent to their inbox)"></textarea><div><button class="btn primary">${ic("check")} Send & mark reviewed</button></div></form>`}</section>`;
+}
+
+function vPrograms() {
+  const tabs = `<div class="tabs"><button class="${ui.sub === "programs" ? "on" : ""}" data-act="sub" data-v="programs">Programs</button><button class="${ui.sub === "library" ? "on" : ""}" data-act="sub" data-v="library">Exercise library</button></div>`;
+  if (ui.sub === "library") return vLibrary(tabs);
+  if (ui.programId && PG(ui.programId)) return vProgramEdit(PG(ui.programId));
+  return `<div class="head"><div><h1>Programs</h1><p class="muted">Build a program once, assign it to any client.</p></div><button class="btn primary" data-act="newProgram">${ic("plus")} New program</button></div>${tabs}
+    ${db.programs.length ? `<div class="exgrid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">${db.programs.map(p => { const n = db.clients.filter(c => c.programId === p.id).length; return `<div class="ex" style="cursor:pointer;gap:10px" data-act="editProgram" data-id="${p.id}">
+      <div class="row between"><h3>${esc(p.name)}</h3><span class="pill plain">${p.weeks} wk</span></div><p>${esc(p.desc)}</p>
+      <div class="small muted">${p.days.length} day${p.days.length === 1 ? "" : "s"} · ${p.days.reduce((a, d) => a + d.items.length, 0)} exercises · ${n} client${n === 1 ? "" : "s"}</div></div>`; }).join("")}</div>`
+      : `<div class="empty">No programs yet. Create one to assign it to clients.</div>`}`;
+}
+
+function vProgramEdit(p) {
+  return `<div><button class="btn ghost sm" data-act="backPrograms">${ic("back")} All programs</button></div>
+    <section class="card"><div class="stack"><div class="grid2" style="grid-template-columns:minmax(0,3fr) minmax(0,1fr)"><label class="field"><span>Program name</span><input id="pg-name" value="${esc(p.name)}" data-change="prog" data-f="name"></label>
+      <label class="field"><span>Length (weeks)</span><input id="pg-weeks" type="number" min="1" value="${p.weeks}" data-change="prog" data-f="weeks"></label></div>
+      <label class="field"><span>Description & progression notes</span><textarea id="pg-desc" data-change="prog" data-f="desc">${esc(p.desc)}</textarea></label>
+      <div class="row wrap"><button class="btn sm" data-act="dupProgram" data-id="${p.id}">${ic("copy")} Duplicate</button><button class="btn sm danger" data-act="delProgram" data-id="${p.id}" data-confirm="Tap again to delete">${ic("trash")} Delete</button></div></div></section>
+    ${p.days.map((d, di) => `<div class="daycard"><div class="dh"><input id="day-${di}" value="${esc(d.name)}" data-change="dayName" data-d="${di}" aria-label="Day name"><button class="iconbtn" data-act="delDay" data-d="${di}" data-confirm="Tap again" aria-label="Delete day">${ic("trash")}</button></div>
+      <div class="db"><div class="scroll-x">${d.items.length ? `<table class="ptable"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps / time</th><th>Rest (s)</th><th></th></tr></thead><tbody>
+        ${d.items.map((x, ii) => `<tr><td style="min-width:160px"><b>${esc(exName(x.exId))}</b></td><td class="w-s"><input id="it-${di}-${ii}-s" type="number" min="1" value="${x.sets}" data-change="item" data-d="${di}" data-i="${ii}" data-f="sets" aria-label="Sets"></td>
+          <td class="w-r"><input id="it-${di}-${ii}-r" value="${esc(x.reps)}" data-change="item" data-d="${di}" data-i="${ii}" data-f="reps" aria-label="Reps"></td><td class="w-rest"><input id="it-${di}-${ii}-rt" type="number" min="0" step="15" value="${x.rest}" data-change="item" data-d="${di}" data-i="${ii}" data-f="rest" aria-label="Rest seconds"></td>
+          <td style="width:40px"><button class="iconbtn" data-act="delItem" data-d="${di}" data-i="${ii}" aria-label="Remove">${ic("x")}</button></td></tr>`).join("")}</tbody></table>` : `<div class="empty">No exercises yet.</div>`}</div>
+        <div style="margin-top:10px"><button class="btn sm" data-act="pickEx" data-d="${di}">${ic("plus")} Add exercise</button></div></div></div>`).join("")}
+    <div><button class="btn" data-act="addDay">${ic("plus")} Add training day</button></div>`;
+}
+
+function vLibrary(tabs) {
+  const muscles = ["All", ...new Set(db.exercises.map(e => e.muscle))];
+  const q = ui.libQ.toLowerCase();
+  const list = db.exercises.filter(e => (ui.libMuscle === "All" || e.muscle === ui.libMuscle) && (!q || e.name.toLowerCase().includes(q) || e.equipment.toLowerCase().includes(q)));
+  return `<div class="head"><div><h1>Exercise library</h1><p class="muted">${db.exercises.length} exercises with coaching cues</p></div><button class="btn primary" data-act="addExercise">${ic("plus")} Add exercise</button></div>${tabs}
+    <div class="row wrap"><div style="flex:1;min-width:200px"><input id="libQ" data-search="libQ" placeholder="Search exercise or equipment" value="${esc(ui.libQ)}" aria-label="Search exercises"></div></div>
+    <div class="chips">${muscles.map(m => `<button class="chip ${ui.libMuscle === m ? "on" : ""}" data-act="libMuscle" data-v="${esc(m)}">${esc(m)}</button>`).join("")}</div>
+    ${list.length ? `<div class="exgrid">${list.map(e => `<div class="ex"><div class="row between"><b>${esc(e.name)}</b><button class="iconbtn" data-act="delExercise" data-id="${e.id}" data-confirm="Tap again" aria-label="Delete ${esc(e.name)}">${ic("trash")}</button></div>
+      <div class="row wrap" style="gap:6px"><span class="pill lead">${esc(e.muscle)}</span><span class="pill plain">${esc(e.equipment)}</span></div><p>${esc(e.cue)}</p></div>`).join("")}</div>` : `<div class="empty">No exercises match.</div>`}`;
+}
+
+function vSchedule() {
+  const ws = weekStart(ui.weekOff);
+  const days = Array.from({ length: 7 }, (_, i) => iso(addDays(ws, i)));
+  const all = db.sessions.filter(s => days.includes(s.date) && C(s.clientId));
+  return `<div class="head"><div><h1>Schedule</h1><p class="muted">${fmtShort(days[0])} – ${fmtShort(days[6])} · ${all.length} sessions</p></div>
+      <div class="row wrap"><button class="iconbtn" data-act="week" data-n="-1" aria-label="Previous week">${ic("left")}</button><button class="btn sm" data-act="week" data-n="0">This week</button><button class="iconbtn" data-act="week" data-n="1" aria-label="Next week">${ic("right")}</button><button class="btn primary" data-act="addSession">${ic("plus")} Book session</button></div></div>
+    <div class="week">${days.map(d => { const ss = all.filter(s => s.date === d).sort((a, b) => a.time.localeCompare(b.time)); return `<div class="day ${d === TODAY ? "today" : ""}"><h4><span>${parseD(d).toLocaleDateString("en-AU", { weekday: "short" })}</span><span class="small muted num">${parseD(d).getDate()}</span></h4>
+      ${ss.map(s => `<div class="sess ${s.done ? "done" : ""}" data-act="editSession" data-id="${s.id}"><span class="num">${fmtTime(s.time)}</span><b>${esc(C(s.clientId).name)}</b><span class="muted">${esc(s.type)}</span></div>`).join("")}
+      <button class="btn sm ghost" data-act="addSession" data-date="${d}" style="margin-top:auto;align-self:flex-start">${ic("plus")}</button></div>`; }).join("")}</div>`;
+}
+
+function vInbox() {
+  const tabs = `<div class="tabs"><button class="${ui.inboxTab === "messages" ? "on" : ""}" data-act="inboxTab" data-v="messages">Messages${totalUnread() ? ` <span class="badge">${totalUnread()}</span>` : ""}</button><button class="${ui.inboxTab === "checkins" ? "on" : ""}" data-act="inboxTab" data-v="checkins">Check-ins${pendingCheckins().length ? ` <span class="badge">${pendingCheckins().length}</span>` : ""}</button></div>`;
+  if (ui.inboxTab === "checkins") {
+    const cis = db.checkins.filter(x => C(x.clientId)).sort((a, b) => (a.reviewed - b.reviewed) || b.date.localeCompare(a.date));
+    return `<div class="head"><div><h1>Inbox</h1><p class="muted">Weekly check-ins, newest first</p></div></div>${tabs}${cis.length ? `<div class="stack">${cis.map(checkinCard).join("")}</div>` : `<div class="empty">No check-ins yet.</div>`}`;
+  }
+  const convs = db.clients.map(c => ({ c, last: (db.messages[c.id] || []).slice(-1)[0] })).sort((a, b) => ((b.last || {}).ts || 0) - ((a.last || {}).ts || 0));
+  const cur = ui.inboxId && C(ui.inboxId);
+  return `<div class="head"><div><h1>Inbox</h1><p class="muted">Chat with clients between sessions</p></div></div>${tabs}
+    <div class="inbox ${cur ? "has-thread" : ""}"><div class="convs">${convs.length ? convs.map(({ c, last }) => `<div class="li ${cur && cur.id === c.id ? "on" : ""}" data-act="openInbox" data-id="${c.id}"><div class="av">${initials(c.name)}</div><div class="main"><b>${esc(c.name)}</b><small>${last ? esc(last.text) : "No messages yet"}</small></div>${unreadFrom(c.id) ? `<span class="badge">${unreadFrom(c.id)}</span>` : ""}</div>`).join("") : `<div class="empty" style="margin:14px">No clients yet.</div>`}</div>
+      <div class="thread">${cur ? `<div class="th"><button class="iconbtn" data-act="closeThread" aria-label="Back">${ic("back")}</button><div class="av">${initials(cur.name)}</div><b>${esc(cur.name)}</b></div>${thread(cur.id, "coach")}` : `<div class="empty" style="margin:20px">Pick a conversation.</div>`}</div></div>`;
+}
+
+/* ---------- client app views ---------- */
+function vMe() {
+  const c = C(ui.as);
+  if (!c) return `<div class="empty">Add a client first, then preview their app here.</div>`;
+  const v = ui.cview;
+  if (v === "workout") return vMeWorkout(c);
+  if (v === "progress") return vMeProgress(c);
+  if (v === "checkin") return vMeCheckin(c);
+  if (v === "chat") return `<div class="head"><div><h1>Coach ${esc(db.coachName)}</h1><p class="muted">Usually replies same day</p></div></div><section class="card pad0"><div class="thread">${thread(c.id, "client")}</div></section>`;
+  const p = PG(c.programId); const di = nextDayIdx(c); const day = p && p.days[di];
+  const next = db.sessions.filter(s => s.clientId === c.id && s.date >= TODAY && !s.done).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
+  const tl = (db.habitLogs[c.id] || {})[TODAY] || [];
+  const thisWeek = logsFor(c.id).filter(l => parseD(l.date) >= weekStart()).length;
+  return `<div class="hello"><span class="label" style="color:inherit;opacity:.7">${new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" })}</span><h1>G'day ${esc(c.name.split(" ")[0])}</h1>
+      <span>${next ? `Next session: <b>${next.date === TODAY ? "Today" : fmtDate(next.date)}, ${fmtTime(next.time)}</b> · ${esc(next.type)}` : "No sessions booked. Message your coach to lock one in."}</span></div>
+    <div class="cols"><div class="stack">
+      ${day ? `<div class="wcard"><span class="label" style="color:inherit;opacity:.85">Today's workout · ${esc(p.name)}</span><h2>${esc(day.name)}</h2><span>${day.items.length} exercises · about ${Math.round(day.items.reduce((a, x) => a + x.sets * (45 + (+x.rest || 0)), 0) / 60)} min</span>
+        <button class="btn" data-act="startWorkout" data-d="${di}">${ic("play")} Start workout</button></div>` : `<div class="empty">Your coach hasn't assigned a program yet.</div>`}
+      <section class="card"><div class="card-h"><h3>Today's habits</h3><span class="num small muted">${tl.filter(h => c.habits.includes(h)).length}/${c.habits.length}</span></div>
+        <div class="stack">${c.habits.map(h => `<button class="habit ${tl.includes(h) ? "y" : ""}" data-act="toggleHabit" data-h="${h}" aria-pressed="${tl.includes(h)}"><span class="box">${ic("check")}</span>${esc((H(h) || {}).name)}</button>`).join("") || `<div class="empty">No habits set yet.</div>`}</div></section></div>
+      <div class="stack"><section class="card"><div class="stat3" style="margin:0"><div><span class="label">This week</span><b>${thisWeek}</b><span class="small muted">workouts</span></div><div><span class="label">Habits</span><b>${habitRate(c.id) ?? 0}%</b><span class="small muted">last 7 days</span></div><div><span class="label">Total</span><b>${logsFor(c.id).length}</b><span class="small muted">workouts</span></div></div></section>
+        <section class="card"><div class="card-h"><h3>Weekly check-in</h3></div><p class="muted" style="margin-top:0">Two minutes. Helps ${esc(db.coachName)} adjust your plan.</p><button class="btn primary" data-act="cgo" data-v="checkin">${ic("ci")} Start check-in</button></section></div></div>`;
+}
+
+function vMeWorkout(c) {
+  const p = PG(c.programId);
+  const w = ui.workout && ui.workout.clientId === c.id ? ui.workout : null;
+  if (!w) {
+    if (!p) return `<div class="empty">No program assigned yet.</div>`;
+    const nd = nextDayIdx(c);
+    return `<div class="head"><div><h1>${esc(p.name)}</h1><p class="muted">${p.weeks} weeks · ${esc(p.desc)}</p></div></div>
+      <div class="stack">${p.days.map((d, i) => { const l = logsFor(c.id).find(x => x.programId === p.id && x.dayIdx === i); return `<section class="card"><div class="card-h"><div><h3>${esc(d.name)}</h3><div class="small muted">${l ? "Last done " + fmtDate(l.date) : "Not done yet"}</div></div>${i === nd ? `<span class="pill lead">Up next</span>` : ""}</div>
+        <div class="small muted" style="margin-bottom:12px">${d.items.map(x => `${esc(exName(x.exId))} ${x.sets}×${esc(x.reps)}`).join(" · ")}</div><button class="btn ${i === nd ? "primary" : ""}" data-act="startWorkout" data-d="${i}">${ic("play")} Start</button></section>`; }).join("")}</div>`;
+  }
+  const day = p.days[w.dayIdx];
+  const done = w.sets.flat().filter(s => s.done).length, total = w.sets.flat().length;
+  return `<div class="head"><div><span class="label">${esc(p.name)}</span><h1>${esc(day.name)}</h1><p class="muted num">${done}/${total} sets done</p></div><div class="row"><button class="btn ghost" data-act="cancelWorkout" data-confirm="Tap again to discard">Discard</button><button class="btn primary" data-act="finishWorkout">${ic("check")} Finish</button></div></div>
+    <div class="bar"><i style="width:${total ? done / total * 100 : 0}%"></i></div>
+    ${day.items.map((x, i) => { const e = EX(x.exId) || { name: "Exercise", cue: "" }; const prev = lastSetsFor(c.id, x.exId); return `<section class="card"><div class="card-h"><div><h3>${esc(e.name)}</h3><div class="small muted">${x.sets} × ${esc(x.reps)}${+x.rest ? ` · rest ${x.rest}s` : ""}</div></div></div>
+      ${e.cue ? `<p class="small" style="margin:-6px 0 10px;padding:8px 10px;background:var(--sunk)">${esc(e.cue)}</p>` : ""}
+      ${prev && prev.sets.length ? `<p class="small muted" style="margin:0 0 6px">Last time (${fmtShort(prev.date)}): ${prev.sets.map(s => `${esc(s.kg) || "BW"}×${esc(s.reps)}`).join(", ")}</p>` : ""}
+      ${w.sets[i].map((s, j) => `<div class="setrow ${s.done ? "done" : ""}"><span class="n">${j + 1}</span><label><input id="w-${i}-${j}-kg" inputmode="decimal" data-w="${i},${j},kg" value="${esc(s.kg)}" placeholder="—" aria-label="Set ${j + 1} kg"> kg</label>
+        <label><input id="w-${i}-${j}-reps" inputmode="numeric" data-w="${i},${j},reps" value="${esc(s.reps)}" placeholder="—" aria-label="Set ${j + 1} reps"> reps</label><button class="tick" data-act="setDone" data-i="${i}" data-j="${j}" aria-label="Mark set ${j + 1} done" aria-pressed="${s.done}">${ic("check")}</button></div>`).join("")}</section>`; }).join("")}
+    <button class="btn primary block" data-act="finishWorkout">${ic("check")} Finish workout</button>`;
+}
+
+function vMeProgress(c) {
+  const logs = logsFor(c.id);
+  const month = logs.filter(l => l.date.slice(0, 7) === TODAY.slice(0, 7)).length;
+  const vol = logs.filter(l => daysBetween(l.date, TODAY) < 30).reduce((a, l) => a + l.sets.flat().filter(s => s.done).reduce((b, s) => b + (parseFloat(s.kg) || 0) * (parseInt(s.reps) || 0), 0), 0);
+  return `<div class="head"><div><h1>Progress</h1><p class="muted">Since ${fmtDate(c.start)}</p></div></div>
+    <div class="kpis"><div class="kpi"><span class="label">Workouts this month</span><b>${month}</b></div><div class="kpi"><span class="label">Volume · 30 days</span><b>${Math.round(vol / 1000 * 10) / 10}t</b></div><div class="kpi"><span class="label">Habit hit rate</span><b>${habitRate(c.id) ?? 0}%</b></div><div class="kpi"><span class="label">Weigh-ins</span><b>${c.weights.length}</b></div></div>
+    <div class="cols"><section class="card"><div class="card-h"><h3>Bodyweight</h3></div>${weightStats(c)}${weightChart(c.weights)}</section>
+      <div class="stack"><section class="card"><h3 style="margin-bottom:12px">Log a weigh-in</h3><form class="row" data-form="weight" data-id="${c.id}"><input id="me-kg" type="number" step="0.1" min="20" max="300" name="kg" placeholder="kg" required aria-label="Weight in kg"><button class="btn primary">Save</button></form></section>
+        <section class="card"><div class="card-h"><h3>Workout history</h3></div>${logs.length ? `<div class="list">${logs.slice(0, 8).map(l => { const pp = PG(l.programId); return `<div class="li"><div class="main"><b>${esc(pp && pp.days[l.dayIdx] ? pp.days[l.dayIdx].name : "Workout")}</b><small>${fmtDate(l.date)} · ${l.sets.flat().filter(s => s.done).length} sets</small></div></div>`; }).join("")}</div>` : `<div class="empty">Finish a workout to see it here.</div>`}</section></div></div>`;
+}
+
+function vMeCheckin(c) {
+  const past = db.checkins.filter(x => x.clientId === c.id).sort((a, b) => b.date.localeCompare(a.date));
+  const lastW = [...c.weights].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const rate = (n, label) => `<div class="field"><span>${label}</span><div class="rating">${[1, 2, 3, 4, 5].map(v => `<label><input type="radio" name="${n}" value="${v}" ${v === 3 ? "checked" : ""}><span>${v}</span></label>`).join("")}</div></div>`;
+  return `<div class="head"><div><h1>Weekly check-in</h1><p class="muted">Be honest, it's how the plan gets better.</p></div></div>
+    <div class="cols"><section class="card"><form class="stack" data-form="checkin" data-id="${c.id}">
+      <div class="grid2"><label class="field"><span>Morning weight (kg)</span><input id="ci-w" type="number" step="0.1" name="weight" value="${lastW ? lastW.kg : ""}" required></label><label class="field"><span>Nutrition on plan (%)</span><input id="ci-a" type="number" min="0" max="100" step="5" name="adherence" value="80" required></label></div>
+      ${rate("sleep", "Sleep quality (1 poor · 5 great)")}${rate("energy", "Energy")}${rate("stress", "Stress (1 low · 5 high)")}
+      <label class="field"><span>Wins this week</span><textarea id="ci-wins" name="wins" placeholder="PBs, habits nailed, how clothes fit"></textarea></label>
+      <label class="field"><span>What got in the way?</span><textarea id="ci-str" name="struggles" placeholder="Work, social events, soreness, motivation"></textarea></label>
+      <button class="btn primary">Submit check-in</button></form></section>
+      <section class="card"><div class="card-h"><h3>Past check-ins</h3></div>${past.length ? `<div class="list">${past.map(p => `<div class="li" style="align-items:flex-start"><div class="main"><b>${fmtDate(p.date)} · ${p.weight}kg</b>${p.reply ? `<p class="small" style="margin:4px 0 0">${esc(db.coachName)}: ${esc(p.reply)}</p>` : `<small>${p.reviewed ? "Reviewed" : "Waiting for coach review"}</small>`}</div></div>`).join("")}</div>` : `<div class="empty">Your first check-in will show here.</div>`}</section></div>`;
+}
+
+/* ---------- shell ---------- */
+function render() {
+  const coach = ui.mode === "coach";
+  const nav = coach
+    ? [["dashboard", "Dashboard", "home"], ["clients", "Clients", "users"], ["programs", "Programs", "clip"], ["schedule", "Schedule", "cal"], ["inbox", "Inbox", "chat", totalUnread() + pendingCheckins().length]]
+    : [["today", "Today", "home"], ["workout", "Workout", "dumb"], ["progress", "Progress", "chart"], ["checkin", "Check-in", "ci"], ["chat", "Coach", "chat"]];
+  const cur = coach ? ui.view : ui.cview;
+  const act = coach ? "go" : "cgo";
+  const views = { dashboard: vDashboard, clients: vClients, programs: vPrograms, schedule: vSchedule, inbox: vInbox };
+  const content = coach ? views[ui.view]() : vMe();
+  document.getElementById("app").innerHTML = `<div class="shell">
+    <aside class="side"><div class="brand"><b>Moore Movement</b><span>${coach ? "Coach console" : "Client app"}</span></div>
+      ${nav.map(([k, l, i, b]) => `<button class="nav ${cur === k ? "on" : ""}" data-act="${act}" data-v="${k}">${ic(i)} ${l}${b ? `<span class="badge">${b}</span>` : ""}</button>`).join("")}
+      <div class="spacer"></div><button class="nav" data-act="settings">${ic("gear")} Settings</button></aside>
+    <main><div class="top"><span class="mbrand">Moore Movement</span><div class="grow"></div>
+      ${!coach && db.clients.length ? `<label class="row small asl" style="gap:6px"><span class="muted">Viewing as</span><select id="asSel" data-change="as" style="width:auto;max-width:150px;padding:6px 8px">${db.clients.map(c => `<option value="${c.id}" ${c.id === ui.as ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>` : ""}
+      <div class="seg" role="group" aria-label="App mode"><button class="${coach ? "on" : ""}" data-act="mode" data-v="coach">Coach</button><button class="${coach ? "" : "on"}" data-act="mode" data-v="client">Client view</button></div>
+      <button class="iconbtn" data-act="settings" aria-label="Settings">${ic("gear")}</button></div>
+      <div class="page">${db.example ? `<div class="example"><span>You're looking at example clients and data. Clear it when you're ready to add real clients.</span><button class="btn sm" data-act="settings">Manage data</button></div>` : ""}${content}</div></main>
+    <nav class="tabbar">${nav.map(([k, l, i, b]) => `<button class="tab ${cur === k ? "on" : ""}" data-act="${act}" data-v="${k}">${ic(i)}${l}${b ? `<span class="badge">${b}</span>` : ""}</button>`).join("")}</nav></div>`;
+  const m = document.getElementById("msgs"); if (m) m.scrollTop = m.scrollHeight;
+}
+
+/* ---------- modal, toast, timer ---------- */
+const modalEl = document.getElementById("modal");
+function openModal(html) { modalEl.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`; modalEl.hidden = false; const f = modalEl.querySelector("input,select,textarea"); if (f) f.focus(); }
+function closeModal() { modalEl.hidden = true; modalEl.innerHTML = ""; }
+let toastT;
+function toast(t) { const el = document.getElementById("toast"); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2400); }
+let timerI;
+function startTimer(sec) {
+  if (!sec) return;
+  ui.timer = Date.now() + sec * 1000;
+  clearInterval(timerI); tick(); timerI = setInterval(tick, 250);
+}
+function tick() {
+  const el = document.getElementById("timer");
+  const left = Math.ceil((ui.timer - Date.now()) / 1000);
+  if (!ui.timer || left <= 0) { el.hidden = true; clearInterval(timerI); if (ui.timer && left <= 0) { toast("Rest done. Next set!"); try { navigator.vibrate && navigator.vibrate(200); } catch (e) {} } ui.timer = null; return; }
+  el.hidden = false;
+  el.innerHTML = `<div><span class="label" style="color:inherit;opacity:.7">Rest</span><br><b>${Math.floor(left / 60)}:${pad(left % 60)}</b></div><button class="btn sm" data-act="addRest">+15s</button><button class="btn sm" data-act="skipRest">Skip</button>`;
+}
+const head = (t) => `<div class="row between"><h2>${t}</h2><button class="iconbtn" data-act="close" aria-label="Close">${ic("x")}</button></div>`;
+const clientOpts = sel => db.clients.map(c => `<option value="${c.id}" ${c.id === sel ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+
+/* ---------- actions ---------- */
+const A = {
+  go: ({ v }) => { ui.view = v; if (v === "clients") ui.clientId = null; if (v === "programs") ui.programId = null; window.scrollTo(0, 0); },
+  cgo: ({ v }) => { ui.cview = v; window.scrollTo(0, 0); },
+  mode: ({ v }) => { ui.mode = v; if (v === "client" && !C(ui.as)) ui.as = (db.clients[0] || {}).id; },
+  sub: ({ v }) => { ui.sub = v; ui.programId = null; },
+  ctab: ({ v }) => { ui.ctab = v; },
+  clientFilter: ({ v }) => { ui.clientFilter = v; },
+  libMuscle: ({ v }) => { ui.libMuscle = v; },
+  openClient: ({ id }) => { ui.view = "clients"; ui.clientId = id; ui.ctab = "overview"; window.scrollTo(0, 0); },
+  backClients: () => { ui.clientId = null; },
+  backPrograms: () => { ui.programId = null; },
+  openCheckins: () => { ui.view = "inbox"; ui.inboxTab = "checkins"; },
+  openInbox: ({ id }) => { ui.mode = "coach"; ui.view = "inbox"; ui.inboxTab = "messages"; ui.inboxId = id || null; if (id) { (db.messages[id] || []).forEach(m => { if (m.from === "client") m.read = true; }); save(); } },
+  closeThread: () => { ui.inboxId = null; },
+  inboxTab: ({ v }) => { ui.inboxTab = v; },
+  week: ({ n }) => { ui.weekOff = +n === 0 ? 0 : ui.weekOff + +n; },
+  previewAs: ({ id }) => { ui.mode = "client"; ui.as = id; ui.cview = "today"; window.scrollTo(0, 0); },
+  close: () => closeModal(),
+  completeSession: ({ id }) => { const s = db.sessions.find(x => x.id === id); if (!s) return; s.done = true; const c = C(s.clientId); if (c && c.pkg.left > 0) c.pkg.left--; save(); toast(`Session logged · ${c ? c.pkg.left : 0} left on package`); },
+  pkgAdj: ({ id, n }) => { const c = C(id); c.pkg.left = Math.max(0, c.pkg.left + +n); save(); toast(`${c.pkg.left} sessions left`); },
+  addClient: () => openModal(`${head("Add client")}<form class="stack" data-form="newClient">
+      <label class="field"><span>Full name</span><input id="nc-name" name="name" required></label>
+      <label class="field"><span>Main goal</span><input id="nc-goal" name="goal" placeholder="e.g. Lose 6kg and feel fitter for summer"></label>
+      <div class="grid2"><label class="field"><span>Email</span><input id="nc-email" type="email" name="email"></label><label class="field"><span>Phone</span><input id="nc-phone" type="tel" name="phone" placeholder="04xx xxx xxx"></label></div>
+      <div class="grid3"><label class="field"><span>Status</span><select id="nc-status" name="status"><option value="active">Active</option><option value="lead">Lead</option></select></label><label class="field"><span>Package</span><input id="nc-pkg" name="pkg" value="Weekly PT"></label><label class="field"><span>Monthly $</span><input id="nc-mo" type="number" min="0" name="monthly" value="390"></label></div>
+      <label class="field"><span>Program</span><select id="nc-prog" name="programId"><option value="">Assign later</option>${db.programs.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select></label>
+      <button class="btn primary">Add client</button></form>`),
+  deleteClient: ({ id }) => { db.clients = db.clients.filter(c => c.id !== id); db.sessions = db.sessions.filter(s => s.clientId !== id); db.checkins = db.checkins.filter(s => s.clientId !== id); db.workoutLogs = db.workoutLogs.filter(s => s.clientId !== id); delete db.messages[id]; delete db.habitLogs[id]; ui.clientId = null; if (ui.as === id) ui.as = (db.clients[0] || {}).id; save(); toast("Client deleted"); },
+  logWeight: ({ id }) => openModal(`${head("Log weigh-in")}<form class="stack" data-form="weight" data-id="${id}"><div class="grid2"><label class="field"><span>Weight (kg)</span><input id="lw-kg" type="number" step="0.1" min="20" max="300" name="kg" required></label><label class="field"><span>Date</span><input id="lw-d" type="date" name="date" value="${TODAY}" required></label></div><button class="btn primary">Save</button></form>`),
+  addSession: ({ id, date }) => { if (!db.clients.length) return toast("Add a client first"); openModal(`${head("Book session")}<form class="stack" data-form="session">
+      <label class="field"><span>Client</span><select id="ns-c" name="clientId">${clientOpts(id)}</select></label>
+      <div class="grid2"><label class="field"><span>Date</span><input id="ns-d" type="date" name="date" value="${date || TODAY}" required></label><label class="field"><span>Time</span><input id="ns-t" type="time" name="time" value="06:00" step="900" required></label></div>
+      <label class="field"><span>Type</span><select id="ns-type" name="type">${["PT 1:1", "Partner PT", "Small group", "Trial session", "Assessment", "Body comp check"].map(t => `<option>${t}</option>`).join("")}</select></label>
+      <label class="row small"><input type="checkbox" id="ns-rep" name="repeat"> Repeat weekly for 8 weeks</label>
+      <button class="btn primary">Book</button></form>`); },
+  editSession: ({ id }) => { const s = db.sessions.find(x => x.id === id); const c = C(s.clientId); openModal(`${head(esc(c.name))}<p class="muted" style="margin:0">${fmtDate(s.date)} · ${fmtTime(s.time)} · ${esc(s.type)}</p>
+      <div class="row wrap">${s.done ? `<span class="pill good">Completed</span>` : `<button class="btn primary" data-act="completeSession" data-id="${s.id}" data-close="1">${ic("check")} Mark complete</button>`}<button class="btn" data-act="openClient" data-id="${c.id}" data-close="1">Open client</button><button class="btn danger" data-act="delSession" data-id="${s.id}" data-confirm="Tap again to cancel" data-close="1">Cancel session</button></div>`); },
+  delSession: ({ id }) => { db.sessions = db.sessions.filter(s => s.id !== id); save(); toast("Session cancelled"); },
+  newProgram: () => { const p = { id: uid(), name: "New program", weeks: 4, desc: "", days: [{ name: "Day 1", items: [] }] }; db.programs.push(p); ui.programId = p.id; save(); },
+  editProgram: ({ id }) => { ui.view = "programs"; ui.sub = "programs"; ui.programId = id; window.scrollTo(0, 0); },
+  dupProgram: ({ id }) => { const p = JSON.parse(JSON.stringify(PG(id))); p.id = uid(); p.name += " (copy)"; db.programs.push(p); ui.programId = p.id; save(); toast("Program duplicated"); },
+  delProgram: ({ id }) => { db.programs = db.programs.filter(p => p.id !== id); db.clients.forEach(c => { if (c.programId === id) c.programId = null; }); ui.programId = null; save(); toast("Program deleted"); },
+  addDay: () => { const p = PG(ui.programId); p.days.push({ name: `Day ${p.days.length + 1}`, items: [] }); save(); },
+  delDay: ({ d }) => { PG(ui.programId).days.splice(+d, 1); save(); },
+  delItem: ({ d, i }) => { PG(ui.programId).days[+d].items.splice(+i, 1); save(); },
+  pickEx: ({ d }) => { ui.pickDay = +d; ui.pickQ = ""; openModal(`${head("Add exercise")}<input id="pickQ" data-pick placeholder="Search library" aria-label="Search library"><div class="list" id="pickList">${pickList()}</div>`); },
+  pickOne: ({ id }) => { PG(ui.programId).days[ui.pickDay].items.push({ exId: id, sets: 3, reps: "10", rest: 90 }); save(); closeModal(); toast(`${exName(id)} added`); },
+  addExercise: () => openModal(`${head("Add exercise")}<form class="stack" data-form="exercise"><label class="field"><span>Name</span><input id="ne-n" name="name" required></label>
+      <div class="grid2"><label class="field"><span>Muscle group</span><input id="ne-m" name="muscle" list="muscles" required><datalist id="muscles">${[...new Set(db.exercises.map(e => e.muscle))].map(m => `<option value="${esc(m)}">`).join("")}</datalist></label><label class="field"><span>Equipment</span><input id="ne-e" name="equipment" placeholder="Dumbbell"></label></div>
+      <label class="field"><span>Coaching cue</span><textarea id="ne-c" name="cue" placeholder="What you'd say to a client mid-set"></textarea></label><button class="btn primary">Save to library</button></form>`),
+  delExercise: ({ id }) => { const used = db.programs.some(p => p.days.some(d => d.items.some(x => x.exId === id))); if (used) return toast("That exercise is used in a program. Remove it there first."); db.exercises = db.exercises.filter(e => e.id !== id); save(); },
+  toggleHabit: ({ h }) => { const L = (db.habitLogs[ui.as] = db.habitLogs[ui.as] || {}); const t = (L[TODAY] = L[TODAY] || []); const i = t.indexOf(h); i > -1 ? t.splice(i, 1) : t.push(h); save(); },
+  startWorkout: ({ d }) => { const c = C(ui.as); const p = PG(c.programId); const day = p.days[+d];
+    ui.workout = { clientId: c.id, programId: p.id, dayIdx: +d, sets: day.items.map(x => { const prev = lastSetsFor(c.id, x.exId); return Array.from({ length: +x.sets || 1 }, (_, j) => { const ps = prev && (prev.sets[j] || prev.sets[prev.sets.length - 1]); return { kg: ps ? ps.kg : "", reps: ps ? ps.reps : (parseInt(x.reps) ? String(parseInt(x.reps)) : ""), done: false }; }); }) };
+    ui.cview = "workout"; window.scrollTo(0, 0); },
+  setDone: ({ i, j }) => { const s = ui.workout.sets[+i][+j]; s.done = !s.done; if (s.done) { const p = PG(ui.workout.programId); startTimer(+p.days[ui.workout.dayIdx].items[+i].rest || 0); } },
+  addRest: () => { if (ui.timer) ui.timer += 15000; tick(); return false; },
+  skipRest: () => { ui.timer = null; tick(); return false; },
+  cancelWorkout: () => { ui.workout = null; ui.timer = null; tick(); },
+  finishWorkout: () => { const w = ui.workout; const n = w.sets.flat().filter(s => s.done).length; if (!n) return toast("Tick off at least one set first"); db.workoutLogs.push({ id: uid(), clientId: w.clientId, programId: w.programId, dayIdx: w.dayIdx, date: TODAY, sets: w.sets }); ui.workout = null; ui.timer = null; tick(); ui.cview = "today"; save(); toast(`Workout saved · ${n} set${n === 1 ? "" : "s"} logged`); },
+  settings: () => openModal(`${head("Settings")}<form class="stack" data-form="settings"><label class="field"><span>Coach name</span><input id="st-name" name="coachName" value="${esc(db.coachName)}"></label><button class="btn primary">Save</button></form>
+      <hr style="border:0;border-top:1px solid var(--line);width:100%"><div class="stack"><b>Data</b><p class="muted small" style="margin:0">Everything is saved on this device only, in this browser. Clearing it can't be undone.</p>
+      <div class="row wrap"><button class="btn danger" data-act="wipe" data-confirm="Tap again to clear everything">Start fresh (clear all)</button><button class="btn" data-act="reseed" data-confirm="Tap again to reload examples">Reload example data</button></div></div>`),
+  wipe: () => { db = blank(); ui.clientId = ui.programId = ui.inboxId = ui.as = null; ui.workout = null; save(); closeModal(); toast("All data cleared. Add your first client."); },
+  reseed: () => { db = seed(); ui.clientId = ui.programId = ui.inboxId = null; ui.as = "c1"; ui.workout = null; save(); closeModal(); toast("Example data loaded"); }
+};
+
+function pickList() {
+  const q = ui.pickQ.toLowerCase();
+  const l = db.exercises.filter(e => !q || e.name.toLowerCase().includes(q) || e.muscle.toLowerCase().includes(q));
+  return l.map(e => `<div class="li click" data-act="pickOne" data-id="${e.id}"><div class="main"><b>${esc(e.name)}</b><small>${esc(e.muscle)} · ${esc(e.equipment)}</small></div>${ic("plus")}</div>`).join("") || `<div class="empty">No match. Add it under Exercise library.</div>`;
+}
+
+const FORMS = {
+  newClient: d => { const c = { id: uid(), name: d.name.trim(), goal: d.goal.trim(), email: d.email, phone: d.phone, start: TODAY, status: d.status, programId: d.programId || null, habits: [], pkg: { name: d.pkg || "PT", monthly: +d.monthly || 0, left: 0 }, notes: "", weights: [] };
+    db.clients.push(c); save(); closeModal(); ui.view = "clients"; ui.clientId = c.id; ui.ctab = "overview"; toast(`${c.name} added`); },
+  editClient: (d, f) => { const c = C(f.dataset.id); Object.assign(c, { name: d.name.trim(), status: d.status, goal: d.goal, email: d.email, phone: d.phone, notes: d.notes }); c.pkg = { name: d.pkg, monthly: +d.monthly || 0, left: Math.max(0, +d.left || 0) }; save(); toast("Saved"); },
+  weight: (d, f) => { const c = C(f.dataset.id); const date = d.date || TODAY; c.weights = c.weights.filter(w => w.date !== date); c.weights.push({ date, kg: +(+d.kg).toFixed(1) }); c.weights.sort((a, b) => a.date.localeCompare(b.date)); save(); closeModal(); toast(`${d.kg}kg logged`); },
+  session: d => { const n = d.repeat ? 8 : 1; for (let i = 0; i < n; i++) db.sessions.push({ id: uid(), clientId: d.clientId, date: iso(addDays(parseD(d.date), i * 7)), time: d.time, type: d.type, done: false }); save(); closeModal(); toast(n > 1 ? "8 weekly sessions booked" : "Session booked"); },
+  send: (d, f) => { const t = (d.text || "").trim(); if (!t) return; const cid = f.dataset.cid; (db.messages[cid] = db.messages[cid] || []).push({ from: f.dataset.from, text: t, ts: Date.now(), read: f.dataset.from === "coach", readByClient: f.dataset.from === "client" }); save(); },
+  reviewCheckin: (d, f) => { const ci = db.checkins.find(x => x.id === f.dataset.id); ci.reviewed = true; ci.reply = d.reply.trim(); if (ci.reply) (db.messages[ci.clientId] = db.messages[ci.clientId] || []).push({ from: "coach", text: `Check-in feedback: ${ci.reply}`, ts: Date.now(), read: true, readByClient: false }); save(); toast("Check-in reviewed"); },
+  checkin: (d, f) => { const c = C(f.dataset.id); db.checkins.push({ id: uid(), clientId: c.id, date: TODAY, weight: +d.weight, sleep: +d.sleep, energy: +d.energy, stress: +d.stress, adherence: +d.adherence, wins: d.wins, struggles: d.struggles, reviewed: false, reply: "" });
+    c.weights = c.weights.filter(w => w.date !== TODAY); c.weights.push({ date: TODAY, kg: +d.weight }); c.weights.sort((a, b) => a.date.localeCompare(b.date)); save(); toast("Check-in sent to your coach"); },
+  newHabit: (d, f) => { const h = { id: uid(), name: d.name.trim() }; db.habits.push(h); C(f.dataset.id).habits.push(h.id); save(); },
+  exercise: d => { db.exercises.push({ id: uid(), name: d.name.trim(), muscle: d.muscle.trim(), equipment: d.equipment.trim() || "Bodyweight", cue: d.cue.trim() }); save(); closeModal(); toast("Exercise added"); },
+  settings: d => { db.coachName = d.coachName.trim() || "Coach"; save(); closeModal(); toast("Saved"); }
+};
+
+const CH = {
+  assign: (v, ds) => { C(ds.id).programId = v || null; toast(v ? `Assigned ${PG(v).name}` : "Program removed"); },
+  habitAssign: (v, ds, el) => { const c = C(ds.id); c.habits = el.checked ? [...new Set([...c.habits, ds.h])] : c.habits.filter(h => h !== ds.h); },
+  as: v => { ui.as = v; ui.workout = null; },
+  prog: (v, ds) => { const p = PG(ui.programId); p[ds.f] = ds.f === "weeks" ? Math.max(1, +v || 1) : v; },
+  dayName: (v, ds) => { PG(ui.programId).days[+ds.d].name = v; },
+  item: (v, ds) => { const it = PG(ui.programId).days[+ds.d].items[+ds.i]; it[ds.f] = ds.f === "reps" ? v : Math.max(0, +v || 0); }
+};
+
+/* ---------- event wiring ---------- */
+document.addEventListener("click", e => {
+  if (e.target === modalEl) { closeModal(); return; }
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const fn = A[el.dataset.act]; if (!fn) return;
+  if (el.dataset.confirm && !el.dataset.armed) {
+    el.dataset.armed = "1"; const old = el.innerHTML; el.textContent = el.dataset.confirm;
+    setTimeout(() => { if (el.isConnected) { delete el.dataset.armed; el.innerHTML = old; } }, 3000); return;
+  }
+  const r = fn(el.dataset, el, e);
+  if (el.dataset.close) closeModal();
+  if (r !== false) render();
+});
+document.addEventListener("submit", e => {
+  const f = e.target; const fn = FORMS[f.dataset.form]; if (!fn) return;
+  e.preventDefault(); fn(Object.fromEntries(new FormData(f)), f);
+  const keep = f.closest(".composer") ? f.querySelector("input").id : null;
+  render();
+  if (keep) { const i = document.getElementById(keep); if (i) i.focus(); }
+});
+document.addEventListener("change", e => {
+  const el = e.target; const fn = CH[el.dataset.change]; if (!fn) return;
+  fn(el.value, el.dataset, el); save();
+  if (["assign", "as", "habitAssign"].includes(el.dataset.change)) render();
+});
+document.addEventListener("input", e => {
+  const el = e.target;
+  if (el.dataset.search) { ui[el.dataset.search] = el.value; const id = el.id, pos = el.selectionStart; render(); const n = document.getElementById(id); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
+  else if (el.dataset.pick !== undefined) { ui.pickQ = el.value; document.getElementById("pickList").innerHTML = pickList(); }
+  else if (el.dataset.w && ui.workout) { const [i, j, f] = el.dataset.w.split(","); ui.workout.sets[+i][+j][f] = el.value; }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !modalEl.hidden) closeModal(); });
+
+render();
+</script>
+</body>
+</html>
